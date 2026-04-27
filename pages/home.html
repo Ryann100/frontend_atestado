@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Atestados — Início</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/home.css">
+</head>
+<body>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="../assets/logo.png" alt="Logo">
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="home.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Início</span>
+      </a>
+      <a href="atestados.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>
+        <span>Atestados</span>
+      </a>
+      <a href="lista-colaboradores.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>
+        <span>Colaboradores</span>
+      </a>
+      <a href="hospitais.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/><path d="M12 12v4M10 14h4"/></svg>
+        <span>Hospitais</span>
+      </a>
+      <a href="dashboard.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="2" y="10" width="6" height="6" rx="1"/><rect x="9" y="10" width="6" height="6" rx="1"/><rect x="16" y="10" width="6" height="6" rx="1"/></svg>
+        <span>Dashboard</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="perfil.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <span>Meu perfil</span>
+      </a>
+      <a href="../login.html" class="nav-item nav-logout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Sair</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── Overlay mobile ── -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ── Conteúdo principal ── -->
+  <div class="main-wrap">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="topbar-greeting">
+        <span class="topbar-title">Bom dia, Maria 👋</span>
+        <span class="topbar-sub">carregando...</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="topbar-btn" aria-label="Notificações" onclick="location.href='notificacoes.html'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-dot"></span>
+        </button>
+        <div class="topbar-avatar">MR</div>
+      </div>
+    </header>
+
+    <!-- Conteúdo -->
+    <main class="content">
+
+      <div class="competencia-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Competência: Abr/2025 &nbsp;·&nbsp; 16/03 a 15/04
+      </div>
+
+      <div class="cards-grid">
+        <div class="stat-card">
+          <div class="stat-icon accent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Atestados este mês</span>
+            <span class="stat-value">38</span>
+            <span class="stat-trend up">+3 essa semana</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Comparecimentos</span>
+            <span class="stat-value">12</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Dias de afastamento</span>
+            <span class="stat-value">94</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon warning">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Pendentes de revisão</span>
+            <span class="stat-value warning">5</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h2 class="section-title">Últimos atestados cadastrados</h2>
+        <div class="section-actions">
+          <button class="btn-outline" onclick="location.href='atestados.html'">Ver todos</button>
+          <button class="btn-primary" onclick="location.href='novo-atestado.html'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="15" height="15"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Novo atestado
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Colaborador</th>
+              <th>Tipo</th>
+              <th>Emissão</th>
+              <th>Afastamento</th>
+              <th>Dias</th>
+              <th>CID</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="location.href='detalhe-atestado.html'">
+              <td><div class="collab"><div class="collab-av" style="--c:#e03040">AP</div>Ana Paula Santos</div></td>
+              <td>Médico</td><td>02/04/2026</td><td>02/04 – 04/04</td><td>3</td>
+              <td>J06</td><td><span class="badge badge-ok">OK</span></td>
+            </tr>
+            <tr onclick="location.href='detalhe-atestado.html'">
+              <td><div class="collab"><div class="collab-av" style="--c:#2e6da4">CM</div>Carlos Mota</div></td>
+              <td>Comparecimento</td><td>05/04/2025</td><td>05/04</td><td>—</td>
+              <td>Z00</td><td><span class="badge badge-ok">OK</span></td>
+            </tr>
+            <tr onclick="location.href='detalhe-atestado.html'">
+              <td><div class="collab"><div class="collab-av" style="--c:#8e44ad">FT</div>Fernanda Torres</div></td>
+              <td>Maternidade</td><td>10/03/2025</td><td>10/03 – 06/07</td><td>120</td>
+              <td>Z34</td><td><span class="badge badge-info">Em curso</span></td>
+            </tr>
+            <tr onclick="location.href='detalhe-atestado.html'">
+              <td><div class="collab"><div class="collab-av" style="--c:#e67e22">JR</div>João Ribeiro</div></td>
+              <td>Médico</td><td>12/04/2025</td><td>12/04 – 13/04</td><td>2</td>
+              <td><span class="cid-nri">F32 ⚠</span></td><td><span class="badge badge-warn">Revisar</span></td>
+            </tr>
+            <tr onclick="location.href='detalhe-atestado.html'">
+              <td><div class="collab"><div class="collab-av" style="--c:#27ae60">ML</div>Marcos Lima</div></td>
+              <td>Luto</td><td>15/04/2025</td><td>15/04 – 16/04</td><td>2</td>
+              <td>—</td><td><span class="badge badge-ok">OK</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../js/home.js"></script>
+</body>
+</html>

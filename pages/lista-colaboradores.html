@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Atestados — Colaboradores</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/home.css">
+  <link rel="stylesheet" href="../css/lista-colaboradores.css">
+</head>
+<body>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><img src="../assets/logo.png" alt="Logo"></div>
+    <nav class="sidebar-nav">
+      <a href="home.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Início</span>
+      </a>
+      <a href="atestados.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>
+        <span>Atestados</span>
+      </a>
+      <a href="lista-colaboradores.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>
+        <span>Colaboradores</span>
+      </a>
+      <a href="hospitais.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/><path d="M12 12v4M10 14h4"/></svg>
+        <span>Hospitais</span>
+      </a>
+      <a href="dashboard.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="2" y="10" width="6" height="6" rx="1"/><rect x="9" y="10" width="6" height="6" rx="1"/><rect x="16" y="10" width="6" height="6" rx="1"/></svg>
+        <span>Dashboard</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="perfil.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <span>Meu perfil</span>
+      </a>
+      <a href="../login.html" class="nav-item nav-logout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Sair</span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="main-wrap">
+
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="topbar-greeting">
+        <span class="topbar-title">Colaboradores</span>
+        <span class="topbar-sub">Base de colaboradores da empresa</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="topbar-btn" aria-label="Notificações" onclick="location.href='notificacoes.html'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-dot"></span>
+        </button>
+        <div class="topbar-avatar">MR</div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- ── Filtros ── -->
+      <div class="filtros-wrap">
+        <div class="filtros-grid">
+          <div class="filtro-group">
+            <label class="filtro-label">Status</label>
+            <select class="filtro-select" id="filtroStatus">
+              <option value="">Todos</option>
+              <option value="ativo">Ativo</option>
+              <option value="inativo">Inativo</option>
+            </select>
+          </div>
+          <div class="filtro-group">
+            <label class="filtro-label">Setor</label>
+            <select class="filtro-select" id="filtroSetor">
+              <option value="">Todos os setores</option>
+              <option>Logística</option>
+              <option>Operacional</option>
+              <option>Administrativo</option>
+              <option>Financeiro</option>
+              <option>RH</option>
+            </select>
+          </div>
+          <div class="filtro-group">
+            <label class="filtro-label">Contrato</label>
+            <select class="filtro-select" id="filtroContrato">
+              <option value="">Todos</option>
+              <option>CLT</option>
+              <option>PJ</option>
+              <option>Aprendiz</option>
+            </select>
+          </div>
+          <div class="filtro-group filtro-busca">
+            <label class="filtro-label">Buscar</label>
+            <div class="busca-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" class="filtro-input" id="filtroBusca" placeholder="Nome ou matrícula...">
+            </div>
+          </div>
+        </div>
+        <div class="filtros-actions">
+          <button class="btn-outline" id="btnLimpar">Limpar filtros</button>
+          <button class="btn-importar" id="btnImportar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Importar planilha
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Resumo strip ── -->
+      <div class="resumo-strip">
+        <div class="resumo-item">
+          <span class="resumo-val" id="totalColabs">0</span>
+          <span class="resumo-label">Total</span>
+        </div>
+        <div class="resumo-sep"></div>
+        <div class="resumo-item">
+          <span class="resumo-val" id="totalAtivos">0</span>
+          <span class="resumo-label">Ativos</span>
+        </div>
+        <div class="resumo-sep"></div>
+        <div class="resumo-item">
+          <span class="resumo-val" id="totalInativos">0</span>
+          <span class="resumo-label">Inativos</span>
+        </div>
+        <div class="resumo-sep"></div>
+        <div class="resumo-item">
+          <span class="resumo-val" id="totalSetores">0</span>
+          <span class="resumo-label">Setores</span>
+        </div>
+      </div>
+
+      <!-- ── Tabela ── -->
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Colaborador</th>
+              <th>Matrícula</th>
+              <th>Cargo</th>
+              <th>Setor</th>
+              <th>Contrato</th>
+              <th>Admissão</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbodyColabs"></tbody>
+        </table>
+      </div>
+
+      <!-- ── Paginação ── -->
+      <div class="paginacao" id="paginacao">
+        <span class="pag-info" id="pagInfo"></span>
+        <div class="pag-btns" id="pagBtns"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ── Modal Importar Planilha ── -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div class="modal-titulo">Importar planilha de colaboradores</div>
+        <button class="modal-fechar" id="modalFechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Step 1: Upload -->
+      <div id="step1">
+        <p class="modal-desc">Faça upload da planilha base para atualizar os cadastros. As alterações serão exibidas para revisão antes de confirmar.</p>
+        <div class="upload-box" id="modalUploadBox">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="32" height="32"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p class="upload-texto">Clique ou arraste o arquivo aqui</p>
+          <p class="upload-hint">Excel (.xlsx) ou CSV · máx. 10MB</p>
+          <input type="file" id="modalInputArquivo" accept=".xlsx,.csv" style="display:none">
+        </div>
+        <div class="modal-actions">
+          <button class="btn-outline" id="btnCancelarModal">Cancelar</button>
+          <button class="btn-primary" id="btnAnalisarArquivo" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Analisar arquivo
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Preview -->
+      <div id="step2" style="display:none">
+        <div class="preview-header">
+          <p class="modal-desc">Revise as alterações detectadas antes de confirmar a importação.</p>
+          <div class="preview-badges" id="previewBadges"></div>
+        </div>
+        <div class="preview-table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Matrícula</th>
+                <th>Nome</th>
+                <th>Alteração</th>
+                <th>Valor anterior</th>
+                <th>Valor novo</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPreview"></tbody>
+          </table>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-outline" id="btnVoltarStep">← Voltar</button>
+          <button class="btn-primary" id="btnConfirmarImport">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+            Confirmar importação
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="../js/lista-colaboradores.js"></script>
+</body>
+</html>

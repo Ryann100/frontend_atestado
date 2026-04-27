@@ -1,0 +1,289 @@
+/* ── Breadcrumb (reutiliza do novo-atestado) ── */
+.breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+}
+.breadcrumb-link {
+  font-size: 14px; color: var(--text-muted);
+  text-decoration: none; transition: color 0.15s;
+}
+.breadcrumb-link:hover { color: var(--accent); }
+.breadcrumb-sep   { color: var(--text-muted); font-size: 16px; }
+.breadcrumb-atual { font-size: 14px; font-weight: 600; color: var(--text); }
+
+/* ══════════════════════════════════════════
+   CABEÇALHO DO COLABORADOR
+══════════════════════════════════════════ */
+.colab-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.colab-header-av {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 700;
+  flex-shrink: 0;
+}
+
+.colab-header-info { flex: 1; min-width: 0; }
+
+.colab-header-nome {
+  font-size: 20px; font-weight: 600;
+  color: var(--text); margin-bottom: 4px;
+}
+.colab-header-sub {
+  font-size: 13px; color: var(--text-muted);
+  margin-bottom: 10px;
+}
+.colab-header-badges {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+
+.badge-status {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+}
+.badge-ativo    { background: rgba(39,174,96,0.12);  color: #2ecc71; }
+.badge-inativo  { background: rgba(127,140,141,0.15); color: var(--text-muted); }
+.badge-setor    { background: rgba(46,109,164,0.12);  color: #4a9fd9; }
+.badge-contrato { background: rgba(142,68,173,0.12);  color: #9b59b6; }
+
+.colab-header-actions { flex-shrink: 0; }
+
+.btn-novo-atestado {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--accent); border: none;
+  color: #fff; font-family: inherit;
+  font-size: 13.5px; font-weight: 600;
+  padding: 10px 18px; border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px var(--accent-glow);
+  transition: background 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+.btn-novo-atestado:hover {
+  background: var(--accent-h);
+  box-shadow: 0 6px 20px rgba(224,48,64,0.4);
+}
+
+/* ── Alerta de reincidência ── */
+.alerta-reincidencia {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(230,126,34,0.08);
+  border: 1px solid rgba(230,126,34,0.3);
+  border-radius: 10px; padding: 12px 16px;
+  font-size: 13px; color: #e67e22;
+  margin-bottom: 14px;
+}
+.alerta-reincidencia svg { flex-shrink: 0; stroke: #e67e22; }
+
+/* ══════════════════════════════════════════
+   LAYOUT DE COLUNAS
+══════════════════════════════════════════ */
+.colab-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.colab-col-left  { display: flex; flex-direction: column; gap: 14px; }
+.colab-col-right { display: flex; flex-direction: column; gap: 14px; }
+
+/* ══════════════════════════════════════════
+   CARD SECTION
+══════════════════════════════════════════ */
+.card-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.card-section-title {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  margin-bottom: 16px;
+}
+.card-section-title svg { stroke: var(--text-muted); flex-shrink: 0; }
+
+.card-section-header {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.card-section-header .card-section-title { margin-bottom: 0; }
+
+/* ── Dados cadastrais ── */
+.dados-lista { display: flex; flex-direction: column; gap: 0; }
+
+.dado-item {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.dado-item:last-child { border-bottom: none; }
+.dado-key   { color: var(--text-muted); flex-shrink: 0; }
+.dado-val   { color: var(--text); font-weight: 500; text-align: right; }
+
+/* ── Histórico de funções ── */
+.historico-lista { display: flex; flex-direction: column; gap: 0; }
+
+.historico-item {
+  display: flex; gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.historico-item:last-child { border-bottom: none; }
+
+.historico-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 4px;
+}
+.historico-dot.atual { background: var(--accent); }
+.historico-dot.ant   { background: var(--border-h); }
+
+.historico-cargo {
+  font-size: 13px; font-weight: 500; color: var(--text);
+  margin-bottom: 2px;
+}
+.historico-detalhe {
+  font-size: 11.5px; color: var(--text-muted);
+}
+.historico-atual-badge {
+  margin-left: auto; flex-shrink: 0;
+  background: rgba(224,48,64,0.1);
+  color: var(--accent);
+  font-size: 10px; font-weight: 600;
+  padding: 2px 8px; border-radius: 10px;
+  height: fit-content;
+}
+
+/* ── Cards de resumo ── */
+.resumo-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.resumo-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.resumo-card-val {
+  font-size: 26px; font-weight: 600; color: var(--text);
+  line-height: 1;
+}
+.resumo-card-val.warn { color: #e67e22; }
+.resumo-card-val.danger { color: var(--danger); }
+.resumo-card-label {
+  font-size: 11px; color: var(--text-muted);
+  font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Filtro mini ── */
+.filtro-mini {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text-muted);
+  font-family: inherit; font-size: 12.5px;
+  padding: 5px 10px;
+  outline: none; cursor: pointer;
+  transition: border-color 0.15s;
+}
+.filtro-mini:focus { border-color: var(--accent); color: var(--text); }
+
+/* ── Tabela ── */
+.table-wrap {
+  border-radius: 10px;
+  overflow: hidden;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+}
+
+.table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px; min-width: 520px;
+}
+.table thead tr { background: var(--surface2); border-bottom: 1px solid var(--border); }
+.table th {
+  padding: 10px 14px; text-align: left;
+  font-size: 11px; font-weight: 600;
+  color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.05em; white-space: nowrap;
+}
+.table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s; cursor: pointer;
+}
+.table tbody tr:last-child { border-bottom: none; }
+.table tbody tr:hover { background: var(--surface2); }
+.table td {
+  padding: 11px 14px; color: var(--text);
+  vertical-align: middle; white-space: nowrap;
+}
+
+.cid-nri {
+  color: var(--danger); font-weight: 600;
+  background: rgba(224,48,64,0.08);
+  padding: 2px 7px; border-radius: 5px;
+}
+
+.badge {
+  display: inline-block; padding: 3px 10px;
+  border-radius: 20px; font-size: 11px; font-weight: 600;
+}
+.badge-ok   { background: rgba(39,174,96,0.12);  color: #2ecc71; }
+.badge-info { background: rgba(46,109,164,0.15); color: #4a9fd9; }
+.badge-warn { background: rgba(230,126,34,0.15); color: #e67e22; }
+
+.empty-msg {
+  text-align: center; padding: 32px 16px;
+  color: var(--text-muted); font-size: 13px;
+}
+
+/* ══════════════════════════════════════════
+   RESPONSIVIDADE
+══════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .colab-grid { grid-template-columns: 260px 1fr; }
+  .resumo-cards { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .colab-grid { grid-template-columns: 1fr; }
+  .resumo-cards { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .colab-header { padding: 18px 16px; gap: 14px; }
+  .colab-header-av { width: 56px; height: 56px; font-size: 18px; }
+  .colab-header-nome { font-size: 17px; }
+  .colab-header-actions { width: 100%; }
+  .btn-novo-atestado { width: 100%; justify-content: center; }
+  .resumo-cards { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .resumo-cards { grid-template-columns: repeat(2, 1fr); }
+  .colab-header-av { width: 48px; height: 48px; font-size: 15px; }
+}
