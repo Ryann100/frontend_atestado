@@ -1,3 +1,8 @@
+// ── Carregamento ───────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  carregarHospitais();
+});
+
 // ── Cores ──────────────────────────────────────────────────────────────
 const TIPO_CORES = {
   'Hospital': { bg: 'rgba(46,109,164,0.12)', color: '#4a9fd9' },
@@ -22,9 +27,7 @@ function iniciais(nome) {
   return nome.replace('Dr. ', '').replace('Dra. ', '').split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
 }
 
-// ══════════════════════════════════════════════════════════════════════
-// TABS
-// ══════════════════════════════════════════════════════════════════════
+// ── TABS ────────────────────────────────────────────────────────────────
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -34,95 +37,195 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-// ══════════════════════════════════════════════════════════════════════
-// HOSPITAIS
-// ══════════════════════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
-  carregarHospitais();
-});
+// ── HOSPITAIS ─────────────────────────────────────────────────────────
 
+let hospitalEditandoId = null;
 const modalHospital = document.getElementById('modalHospital');
+const inputBusca = document.getElementById('buscaHospital');
+const filtroTipo = document.getElementById('filtroTipoHosp');
+
+inputBusca.addEventListener('input', buscarHospitais);
+filtroTipo.addEventListener('change', buscarHospitais);
 
 document.getElementById('btnNovoHospital').addEventListener('click', () => {
+  limparModalHospital();
   modalHospital.classList.add('open');
 });
 
 document.getElementById('fecharModalHospital').addEventListener('click', () => {
+  limparModalHospital();
   modalHospital.classList.remove('open');
 });
 
 document.getElementById('cancelarHospital').addEventListener('click', () => {
+  limparModalHospital();
   modalHospital.classList.remove('open');
 });
 
-modalHospital.addEventListener('click', (e) => {
-  if (e.target === modalHospital) {
+let clicouFora = false;
+
+modalHospital.addEventListener('mousedown', (e) => {
+  clicouFora = e.target === modalHospital;
+});
+
+modalHospital.addEventListener('mouseup', (e) => {
+  if (clicouFora && e.target === modalHospital) {
+    limparModalHospital();
     modalHospital.classList.remove('open');
   }
 });
 
+document.querySelector('#modalHospital .modal').addEventListener('click', (e) => {
+  e.stopPropagation();
+});
+
 document.getElementById('salvarHospital').addEventListener('click', async () => {
-  const nome = document.getElementById('hospNome').value.trim();
-  const tipo = document.getElementById('hospTipo').value;
-  const endereco = document.getElementById('hospEndereco').value;
+  const nome     = document.getElementById('hospNome').value.trim();
+  const tipo     = document.getElementById('hospTipo').value;
+  const endereco = document.getElementById('hospEndereco').value.trim();
 
   if (!nome || !tipo || !endereco) {
     alert('Preencha todos os campos!');
     return;
   }
 
+ const estaEditando = hospitalEditandoId;
+
   try {
-    const res = await fetch('https://api-atestado.onrender.com/hospital/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ nome, tipo, endereco })
-    });
+    let res;
+    if (estaEditando !== null) {
+      //PATCH para atualizar hospital existente
+      res = await fetch(`https://api-atestado.onrender.com/hospital/${estaEditando}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, tipo, endereco }),
+      });
+    } else {
+      //POST para criar novo hospital
+      res = await fetch('https://api-atestado.onrender.com/hospital/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, tipo, endereco }),
+      });
+    }
 
     const data = await res.json();
-
     if (!res.ok) {
-      alert('Erro ao cadastrar hospital: ' + (data.error || res.statusText));
+      alert('Erro: ' + (data.error || res.statusText));
       return;
     }
 
     await carregarHospitais();
+    await limparModalHospital();
     modalHospital.classList.remove('open');
-    mostrarToast('Hospital cadastrado com sucesso!');
-
+    mostrarToast(estaEditando ? 'Hospital atualizado!' : 'Hospital cadastrado!');
   } catch (error) {
-    console.error('Erro ao cadastrar hospital:', error);
+    alert('Erro: ' + error.message);
   }
 });
 
-document.getElementById('hospNome').value = '';
-document.getElementById('hospTipo').value = '';
-document.getElementById('hospEndereco').value = '';
+//─── Funcões do Hospitais ────────────────────────────────────────────────
+async function limparModalHospital() {
+  document.getElementById('hospNome').value     = '';
+  document.getElementById('hospTipo').value     = '';
+  document.getElementById('hospEndereco').value = '';
+  hospitalEditandoId = null;
+  document.getElementById('modalHospitalTitulo').innerText = 'Cadastrar hospital';
+}
 
 async function carregarHospitais() {
   try {
     const res = await fetch('https://api-atestado.onrender.com/hospital/');
-    const hospitais = await res.json();
+    const data = await res.json();
 
-    const tbody = document.getElementById('tbodyHospitais');
-    tbody.innerHTML = '';
-
-    hospitais.forEach(h => {
-      const tr = document.createElement('tr');
-
-      tr.innerHTML = `
-        <td>${tipoIcon(h.tipo)} ${h.nome}</td>
-        <td>${h.tipo}</td>
-        <td>${h.endereco}</td>
-        <td>-</td>
-        <td></td>
-      `;
-
-      tbody.appendChild(tr);
-    });
+    renderHospitais(data);
 
   } catch (error) {
     console.error('Erro ao carregar hospitais:', error);
   }
+}
+
+async function editarHospital(id) {
+  try {
+    const res = await fetch(`https://api-atestado.onrender.com/hospital/${id}`);
+    const hospital = await res.json();
+
+    if (!res.ok) {
+      alert('Erro ao buscar hospital: ' + hospital.error);
+      return;
+    }
+
+    document.getElementById('hospNome').value     = hospital.nome;
+    document.getElementById('hospTipo').value     = hospital.tipo;
+    document.getElementById('hospEndereco').value = hospital.endereco;
+    document.getElementById('modalHospitalTitulo').innerText = 'Editar hospital';
+
+    hospitalEditandoId = id;
+    modalHospital.classList.add('open');
+  } catch (error) {
+    alert('Erro ao buscar hospital: ' + error.message);
+  }
+}
+
+function mostrarToast(mensagem) {
+  const toast = document.createElement('div');
+  toast.innerText = mensagem;
+
+  toast.style.position = 'fixed';
+  toast.style.bottom = '20px';
+  toast.style.right = '20px';
+  toast.style.background = '#2ecc71';
+  toast.style.color = '#fff';
+  toast.style.padding = '12px 16px';
+  toast.style.borderRadius = '8px';
+  toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+  toast.style.zIndex = '9999';
+
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+async function buscarHospitais() {
+  const nome = inputBusca.value.toLowerCase().trim();
+  const tipo = filtroTipo.value;
+
+  try {
+    const res = await fetch('https://api-atestado.onrender.com/hospital/');
+    const data = await res.json();
+    const filtrados = data.filter(h => {
+      const matchNome = h.nome.toLowerCase().includes(nome);
+      const matchTipo = tipo ? h.tipo === tipo : true;
+
+      return matchNome && matchTipo;
+    });
+
+    renderHospitais(filtrados);
+
+  } catch (error) {
+    console.error('Erro na busca:', error);
+  }
+}
+
+async function renderHospitais(data) {
+  const tbody = document.getElementById('tbodyHospitais');
+  tbody.innerHTML = '';
+
+  data.forEach(h => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${tipoIcon(h.tipo)} ${h.nome}</td>
+      <td>${h.tipo}</td>
+      <td>${h.endereco}</td>
+      <td>—</td>
+      <td>
+        <button class="btn-outline" onclick="editarHospital(${h.id})">
+          Editar
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
