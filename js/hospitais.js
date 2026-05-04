@@ -1,10 +1,10 @@
-// ── Carregamento ───────────────────────────────────────────────────────
+// ── CARREGAMENTO ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   carregarHospitais();
   carregarMedicos();
 });
 
-// ── Cores ──────────────────────────────────────────────────────────────
+// ── CORES ──────────────────────────────────────────────────────────────
 const TIPO_CORES = {
   'Hospital': { bg: 'rgba(46,109,164,0.12)', color: '#4a9fd9' },
   'UPA': { bg: 'rgba(224,48,64,0.10)', color: '#e03040' },
@@ -125,7 +125,7 @@ document.getElementById('salvarHospital').addEventListener('click', async () => 
   }
 });
 
-//─── Funcões do Hospitais ────────────────────────────────────────────────
+//─── FUNÇÕES DO HOSPITAL ────────────────────────────────────────────────
 async function limparModalHospital() {
   document.getElementById('hospNome').value = '';
   document.getElementById('hospTipo').value = '';
@@ -359,7 +359,7 @@ document.getElementById('salvarMedico').addEventListener('click', async () => {
   }
 });
 
-// ── Funções de médicos ────────────────────────────────────────────────
+// ── FUNÇÕES DO HOSPITAL ────────────────────────────────────────────────
 
 async function carregarHospitaisNoModal() {
   const menu = document.getElementById('hospDropdownMenu');

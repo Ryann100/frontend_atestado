@@ -1,47 +1,56 @@
-// ── Dados de colaboradores (substituir pela API real) ─────────────────
-const COLABORADORES = [
-  { matricula:'00412', nome:'Ana Paula Santos',  setor:'Logística',      cargo:'Operador de Logística', contrato:'CLT', admissao:'14/03/2019', status:'ativo'   },
-  { matricula:'00891', nome:'Carlos Mota',        setor:'Operacional',    cargo:'Operador',              contrato:'CLT', admissao:'02/07/2020', status:'ativo'   },
-  { matricula:'01102', nome:'Fernanda Torres',    setor:'Administrativo', cargo:'Analista',              contrato:'CLT', admissao:'10/01/2021', status:'ativo'   },
-  { matricula:'00734', nome:'João Ribeiro',       setor:'Logística',      cargo:'Motorista',             contrato:'CLT', admissao:'15/08/2018', status:'ativo'   },
-  { matricula:'01204', nome:'Marcos Lima',        setor:'Operacional',    cargo:'Técnico',               contrato:'CLT', admissao:'05/03/2022', status:'ativo'   },
-  { matricula:'00556', nome:'Patricia Henrique',  setor:'Financeiro',     cargo:'Assistente',            contrato:'CLT', admissao:'20/06/2019', status:'ativo'   },
-  { matricula:'00321', nome:'Rafael Souza',       setor:'RH',             cargo:'Analista de RH',        contrato:'CLT', admissao:'08/02/2020', status:'ativo'   },
-  { matricula:'00678', nome:'Camila Ferreira',    setor:'Logística',      cargo:'Auxiliar',              contrato:'CLT', admissao:'12/11/2021', status:'ativo'   },
-  { matricula:'00990', nome:'Bruno Costa',        setor:'Operacional',    cargo:'Operador Sênior',       contrato:'CLT', admissao:'01/04/2017', status:'ativo'   },
-  { matricula:'01350', nome:'Larissa Campos',     setor:'Administrativo', cargo:'Coordenadora',          contrato:'CLT', admissao:'15/09/2020', status:'ativo'   },
-  { matricula:'00231', nome:'Diego Martins',      setor:'Operacional',    cargo:'Assistente',            contrato:'CLT', admissao:'03/05/2018', status:'inativo' },
-  { matricula:'00445', nome:'Juliana Neves',      setor:'Financeiro',     cargo:'Analista Financeira',   contrato:'CLT', admissao:'22/08/2019', status:'ativo'   },
-  { matricula:'00789', nome:'Thiago Alves',       setor:'Logística',      cargo:'Motorista',             contrato:'CLT', admissao:'14/01/2020', status:'ativo'   },
-  { matricula:'01001', nome:'Sandra Lima',        setor:'RH',             cargo:'Coordenadora de RH',    contrato:'CLT', admissao:'07/03/2016', status:'ativo'   },
-  { matricula:'00123', nome:'Eduardo Pereira',    setor:'Administrativo', cargo:'Assistente Admin.',     contrato:'PJ',  admissao:'10/10/2022', status:'inativo' },
-];
+// ── Init ───────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  carregarColaboradores();
+});
 
 // ── Estado ─────────────────────────────────────────────────────────────
-let dadosFiltrados = [...COLABORADORES];
-let paginaAtual   = 1;
-const POR_PAGINA  = 10;
+let COLABORADORES = [];
+let dadosFiltrados = [];
+let paginaAtual = 1;
+const POR_PAGINA = 10;
 
 // ── Cores dos avatares ─────────────────────────────────────────────────
-const CORES = ['#e03040','#2e6da4','#8e44ad','#e67e22','#27ae60','#16a085','#d35400','#2980b9'];
+const CORES = ['#e03040', '#2e6da4', '#8e44ad', '#e67e22', '#27ae60', '#16a085', '#d35400', '#2980b9'];
 function corAvatar(nome) {
   let h = 0;
   for (let i = 0; i < nome.length; i++) h = nome.charCodeAt(i) + ((h << 5) - h);
   return CORES[Math.abs(h) % CORES.length];
 }
 function iniciais(nome) {
-  return nome.split(' ').slice(0,2).map(p => p[0]).join('').toUpperCase();
+  return nome.split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
 }
 
 // ── Elementos ──────────────────────────────────────────────────────────
-const filtroStatus   = document.getElementById('filtroStatus');
-const filtroSetor    = document.getElementById('filtroSetor');
+const filtroStatus = document.getElementById('filtroStatus');
+const filtroSetor = document.getElementById('filtroSetor');
 const filtroContrato = document.getElementById('filtroContrato');
-const filtroBusca    = document.getElementById('filtroBusca');
-const btnLimpar      = document.getElementById('btnLimpar');
-const tbodyColabs    = document.getElementById('tbodyColabs');
-const pagInfo        = document.getElementById('pagInfo');
-const pagBtns        = document.getElementById('pagBtns');
+const filtroBusca = document.getElementById('filtroBusca');
+const btnLimpar = document.getElementById('btnLimpar');
+const tbodyColabs = document.getElementById('tbodyColabs');
+const pagInfo = document.getElementById('pagInfo');
+const pagBtns = document.getElementById('pagBtns');
+
+// ── Carregar da API ────────────────────────────────────────────────────
+async function carregarColaboradores() {
+  try {
+    const res = await fetch('https://api-atestado.onrender.com/colaborador/');
+    const data = await res.json();
+    console.log('DATA BRUTA:', data);
+
+    COLABORADORES = data.map(c => ({
+      ...c,
+      status: c.status === true ? 'ativo' : 'inativo',
+      contrato: c.tipoContrato,
+      setor: c.departamento,
+      admissao: new Date(c.dataAdmissao).toLocaleDateString('pt-BR')
+    }));
+
+    dadosFiltrados = [...COLABORADORES];
+    render();
+  } catch (error) {
+    console.error('Erro ao carregar colaboradores:', error);
+  }
+}
 
 // ── Renderizar tabela ──────────────────────────────────────────────────
 function renderTabela() {
@@ -87,10 +96,10 @@ function renderTabela() {
 
 // ── Paginação ──────────────────────────────────────────────────────────
 function renderPaginacao() {
-  const total    = dadosFiltrados.length;
+  const total = dadosFiltrados.length;
   const totalPag = Math.ceil(total / POR_PAGINA);
-  const inicio   = (paginaAtual - 1) * POR_PAGINA + 1;
-  const fim      = Math.min(paginaAtual * POR_PAGINA, total);
+  const inicio = (paginaAtual - 1) * POR_PAGINA + 1;
+  const fim = Math.min(paginaAtual * POR_PAGINA, total);
 
   pagInfo.textContent = total === 0
     ? 'Nenhum resultado'
@@ -98,10 +107,9 @@ function renderPaginacao() {
 
   pagBtns.innerHTML = '';
 
-  // Seta anterior
   const btnAnt = document.createElement('button');
   btnAnt.className = 'pag-btn';
-  btnAnt.disabled  = paginaAtual === 1;
+  btnAnt.disabled = paginaAtual === 1;
   btnAnt.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>`;
   btnAnt.addEventListener('click', () => { if (paginaAtual > 1) { paginaAtual--; render(); } });
   pagBtns.appendChild(btnAnt);
@@ -127,10 +135,9 @@ function renderPaginacao() {
     });
   }
 
-  // Seta próxima
   const btnProx = document.createElement('button');
   btnProx.className = 'pag-btn';
-  btnProx.disabled  = paginaAtual === totalPag || total === 0;
+  btnProx.disabled = paginaAtual === totalPag || total === 0;
   btnProx.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>`;
   btnProx.addEventListener('click', () => {
     if (paginaAtual < Math.ceil(dadosFiltrados.length / POR_PAGINA)) { paginaAtual++; render(); }
@@ -140,13 +147,13 @@ function renderPaginacao() {
 
 // ── Resumo ─────────────────────────────────────────────────────────────
 function renderResumo() {
-  const total    = dadosFiltrados.length;
-  const ativos   = dadosFiltrados.filter(c => c.status === 'ativo').length;
+  const total = dadosFiltrados.length;
+  const ativos = dadosFiltrados.filter(c => c.status === 'ativo').length;
   const inativos = dadosFiltrados.filter(c => c.status === 'inativo').length;
-  const setores  = new Set(dadosFiltrados.map(c => c.setor)).size;
+  const setores = new Set(dadosFiltrados.map(c => c.setor)).size;
 
-  document.getElementById('totalColabs').textContent  = total;
-  document.getElementById('totalAtivos').textContent  = ativos;
+  document.getElementById('totalColabs').textContent = total;
+  document.getElementById('totalAtivos').textContent = ativos;
   document.getElementById('totalInativos').textContent = inativos;
   document.getElementById('totalSetores').textContent = setores;
 }
@@ -160,16 +167,16 @@ function render() {
 
 // ── Filtros ────────────────────────────────────────────────────────────
 function aplicarFiltros() {
-  const status   = filtroStatus.value;
-  const setor    = filtroSetor.value;
+  const status = filtroStatus.value;
+  const setor = filtroSetor.value;
   const contrato = filtroContrato.value;
-  const busca    = filtroBusca.value.toLowerCase().trim();
+  const busca = filtroBusca.value.toLowerCase().trim();
 
   dadosFiltrados = COLABORADORES.filter(c => {
-    if (status   && c.status   !== status)   return false;
-    if (setor    && c.setor    !== setor)    return false;
+    if (status && c.status !== status) return false;
+    if (setor && c.setor !== setor) return false;
     if (contrato && c.contrato !== contrato) return false;
-    if (busca    && !c.nome.toLowerCase().includes(busca) && !c.matricula.includes(busca)) return false;
+    if (busca && !c.nome.toLowerCase().includes(busca) && !c.matricula.includes(busca)) return false;
     return true;
   });
 
@@ -182,7 +189,7 @@ filtroBusca.addEventListener('input', aplicarFiltros);
 
 btnLimpar.addEventListener('click', () => {
   filtroStatus.selectedIndex = 0;
-  filtroSetor.selectedIndex  = 0;
+  filtroSetor.selectedIndex = 0;
   filtroContrato.selectedIndex = 0;
   filtroBusca.value = '';
   dadosFiltrados = [...COLABORADORES];
@@ -190,24 +197,22 @@ btnLimpar.addEventListener('click', () => {
   render();
 });
 
-// ══════════════════════════════════════════════════════════════════════
-// MODAL IMPORTAR PLANILHA
-// ══════════════════════════════════════════════════════════════════════
-const modalOverlay      = document.getElementById('modalOverlay');
-const btnImportar       = document.getElementById('btnImportar');
-const modalFechar       = document.getElementById('modalFechar');
-const btnCancelarModal  = document.getElementById('btnCancelarModal');
-const modalUploadBox    = document.getElementById('modalUploadBox');
+// ── MODAL IMPORTAR PLANILHA ────────────────────────────────────────────
+
+const modalOverlay = document.getElementById('modalOverlay');
+const btnImportar = document.getElementById('btnImportar');
+const modalFechar = document.getElementById('modalFechar');
+const btnCancelarModal = document.getElementById('btnCancelarModal');
+const modalUploadBox = document.getElementById('modalUploadBox');
 const modalInputArquivo = document.getElementById('modalInputArquivo');
 const btnAnalisarArquivo = document.getElementById('btnAnalisarArquivo');
-const btnVoltarStep     = document.getElementById('btnVoltarStep');
+const btnVoltarStep = document.getElementById('btnVoltarStep');
 const btnConfirmarImport = document.getElementById('btnConfirmarImport');
-const step1             = document.getElementById('step1');
-const step2             = document.getElementById('step2');
+const step1 = document.getElementById('step1');
+const step2 = document.getElementById('step2');
 
 let arquivoSelecionado = null;
 
-// Abrir/fechar modal
 btnImportar.addEventListener('click', () => { modalOverlay.classList.add('open'); });
 modalFechar.addEventListener('click', fecharModal);
 btnCancelarModal.addEventListener('click', fecharModal);
@@ -218,7 +223,7 @@ function fecharModal() {
   setTimeout(() => {
     step1.style.display = 'block';
     step2.style.display = 'none';
-    arquivoSelecionado  = null;
+    arquivoSelecionado = null;
     btnAnalisarArquivo.disabled = true;
     modalUploadBox.classList.remove('arquivo-selecionado');
     modalUploadBox.querySelector('.upload-texto').textContent = 'Clique ou arraste o arquivo aqui';
@@ -226,7 +231,6 @@ function fecharModal() {
   }, 300);
 }
 
-// Upload no modal
 modalUploadBox.addEventListener('click', () => modalInputArquivo.click());
 modalUploadBox.addEventListener('dragover', e => { e.preventDefault(); modalUploadBox.classList.add('drag'); });
 modalUploadBox.addEventListener('dragleave', () => modalUploadBox.classList.remove('drag'));
@@ -246,29 +250,27 @@ function selecionarArquivo(file) {
   btnAnalisarArquivo.disabled = false;
 }
 
-// Analisar arquivo → mostrar preview simulado
 btnAnalisarArquivo.addEventListener('click', () => {
   step1.style.display = 'none';
   step2.style.display = 'block';
 
-  // Preview simulado
   const alteracoes = [
-    { matricula:'00412', nome:'Ana Paula Santos',  tipo:'alterado', anterior:'Auxiliar de Expedição', novo:'Operador de Logística' },
-    { matricula:'00891', nome:'Carlos Mota',        tipo:'alterado', anterior:'Ativo',                 novo:'Inativo'              },
-    { matricula:'01601', nome:'Patricia Oliveira',  tipo:'novo',     anterior:'—',                     novo:'Admissão'             },
+    { matricula: '00412', nome: 'Ana Paula Santos', tipo: 'alterado', anterior: 'Auxiliar de Expedição', novo: 'Operador de Logística' },
+    { matricula: '00891', nome: 'Carlos Mota', tipo: 'alterado', anterior: 'Ativo', novo: 'Inativo' },
+    { matricula: '01601', nome: 'Patricia Oliveira', tipo: 'novo', anterior: '—', novo: 'Admissão' },
   ];
 
-  const counts = { novo:0, alterado:0, inativo:0 };
+  const counts = { novo: 0, alterado: 0, inativo: 0 };
   alteracoes.forEach(a => {
-    if (a.tipo === 'novo')     counts.novo++;
+    if (a.tipo === 'novo') counts.novo++;
     if (a.tipo === 'alterado') counts.alterado++;
-    if (a.novo === 'Inativo')  counts.inativo++;
+    if (a.novo === 'Inativo') counts.inativo++;
   });
 
   document.getElementById('previewBadges').innerHTML = `
-    ${counts.novo     ? `<span class="preview-badge novo">● ${counts.novo} novo(s)</span>` : ''}
+    ${counts.novo ? `<span class="preview-badge novo">● ${counts.novo} novo(s)</span>` : ''}
     ${counts.alterado ? `<span class="preview-badge alterado">● ${counts.alterado} alteração(ões)</span>` : ''}
-    ${counts.inativo  ? `<span class="preview-badge inativo">● ${counts.inativo} desligamento(s)</span>` : ''}
+    ${counts.inativo ? `<span class="preview-badge inativo">● ${counts.inativo} desligamento(s)</span>` : ''}
   `;
 
   document.getElementById('tbodyPreview').innerHTML = alteracoes.map(a => `
@@ -282,21 +284,86 @@ btnAnalisarArquivo.addEventListener('click', () => {
   `).join('');
 });
 
-// Voltar ao step 1
 btnVoltarStep.addEventListener('click', () => {
   step2.style.display = 'none';
   step1.style.display = 'block';
 });
 
-// Confirmar importação
 btnConfirmarImport.addEventListener('click', async () => {
   btnConfirmarImport.disabled = true;
   btnConfirmarImport.textContent = 'Importando...';
-
   await new Promise(r => setTimeout(r, 1500));
-
   fecharModal();
   mostrarToast('Planilha importada com sucesso! 3 colaboradores atualizados.');
+});
+
+// ── MODAL NOVO COLABORADOR ─────────────────────────────────────────────
+
+const modalNovoColab = document.getElementById('modalNovoColab');
+const btnNovoColab = document.getElementById('btnNovoColab');
+const fecharNovoColab = document.getElementById('fecharNovoColab');
+const cancelarNovoColab = document.getElementById('cancelarNovoColab');
+
+btnNovoColab.addEventListener('click', () => {
+  modalNovoColab.classList.add('open');
+});
+
+function fecharModalNovo() {
+  modalNovoColab.classList.remove('open');
+}
+
+fecharNovoColab.addEventListener('click', fecharModalNovo);
+cancelarNovoColab.addEventListener('click', fecharModalNovo);
+
+let iniciouDentro = false;
+
+const modalContent = modalNovoColab.querySelector('.modal');
+
+modalNovoColab.addEventListener('mousedown', (e) => {
+  iniciouDentro = modalContent.contains(e.target);
+});
+
+modalNovoColab.addEventListener('mouseup', (e) => {
+  if (!iniciouDentro) {
+    fecharModalNovo();
+  }
+});
+
+document.getElementById('salvarNovoColab').addEventListener('click', async () => {
+  const novo = {
+    nome: document.getElementById('nomeColab').value,
+    matricula: document.getElementById('matriculaColab').value,
+    cargo: document.getElementById('cargoColab').value,
+    unidade: document.getElementById('unidadeColab').value,
+    turno: document.getElementById('turnoColab').value,
+    departamento: document.getElementById('setorColab').value,
+    tipoContrato: document.getElementById('contratoColab').value,
+    dataAdmissao: document.getElementById('admissaoColab').value,
+  };
+
+  try {
+    const res = await fetch('https://api-atestado.onrender.com/colaborador/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(novo)
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      console.error('ERRO BACKEND:', result);
+      mostrarToast(result.error || 'Erro ao cadastrar');
+      return;
+    }
+
+    mostrarToast('Colaborador cadastrado com sucesso!');
+    fecharModalNovo();
+    carregarColaboradores();
+
+  } catch (err) {
+    console.error('ERRO GERAL:', err);
+    mostrarToast('Erro ao cadastrar colaborador');
+  }
 });
 
 // ── Toast ──────────────────────────────────────────────────────────────
@@ -315,8 +382,8 @@ function mostrarToast(msg) {
 }
 
 // ── Sidebar mobile ─────────────────────────────────────────────────────
-const sidebar        = document.getElementById('sidebar');
-const menuToggle     = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const menuToggle = document.getElementById('menuToggle');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
 
 menuToggle.addEventListener('click', () => {
@@ -327,6 +394,3 @@ sidebarOverlay.addEventListener('click', () => {
   sidebar.classList.remove('open');
   sidebarOverlay.classList.remove('open');
 });
-
-// ── Init ───────────────────────────────────────────────────────────────
-render();

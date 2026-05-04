@@ -154,6 +154,7 @@
         </div>
         <div class="filtros-actions">
           <button class="btn-outline" id="btnLimpar">Limpar filtros</button>
+          <button class="btn-primary" id="btnNovoColab">Novo colaborador</button>
           <button class="btn-importar" id="btnImportar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
               width="14" height="14">
@@ -294,6 +295,101 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="modalNovoColab">
+    <div class="modal">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="modal-titulo">Novo colaborador</div>
+        <button class="modal-fechar" id="fecharNovoColab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Descrição -->
+      <p class="modal-desc">
+        Preencha os dados abaixo para cadastrar um novo colaborador.
+      </p>
+
+      <!-- Form -->
+      <div class="form-grid">
+
+        <div class="filtro-group">
+          <label class="filtro-label">Nome</label>
+          <input class="filtro-input" id="nomeColab" placeholder="Nome completo">
+        </div>
+
+        <div class="filtro-group">
+          <label class="filtro-label">Matrícula</label>
+          <input class="filtro-input" id="matriculaColab" placeholder="Ex: 000123">
+        </div>
+
+        <div class="filtro-group">
+          <label class="filtro-label">Cargo</label>
+          <input class="filtro-input" id="cargoColab" placeholder="Cargo">
+        </div>
+
+        <div class="filtro-group">
+          <label class="filtro-label">Unidade</label>
+          <input class="filtro-input" id="unidadeColab" placeholder="Ex: Matriz">
+        </div>
+
+        <div class="filtro-group">
+          <label class="filtro-label">Turno</label>
+          <select class="filtro-select" id="turnoColab">
+            <option value="">Selecionar</option>
+            <option>Diurno</option>
+            <option>Noturno</option>
+            <option>Integral</option>
+          </select>
+        </div>
+
+        <div class="filtro-group">
+          <label class="filtro-label">Setor</label>
+          <select class="filtro-select" id="setorColab">
+            <option value="">Selecionar</option>
+            <option>Logística</option>
+            <option>Operacional</option>
+            <option>Administrativo</option>
+            <option>Financeiro</option>
+            <option>RH</option>
+            <option>TI</option>
+          </select>
+        </div>
+
+        <div class="filtro-group">
+          <label class="filtro-label">Contrato</label>
+          <select class="filtro-select" id="contratoColab">
+            <option value="">Selecionar</option>
+            <option>CLT</option>
+            <option>PJ</option>
+            <option>Aprendiz</option>
+            <option>Estágio</option>
+          </select>
+        </div>
+
+        <div class="filtro-group">
+          <label class="filtro-label">Admissão</label>
+          <input type="date" class="filtro-input" id="admissaoColab">
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="modal-actions">
+        <button class="btn-outline" id="cancelarNovoColab">Cancelar</button>
+        <button class="btn-primary" id="salvarNovoColab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          Salvar
+        </button>
+      </div>
+
+    </div>
+  </div>
   <script src="../js/lista-colaboradores.js"></script>
 </body>
 
