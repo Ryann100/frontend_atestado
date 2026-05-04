@@ -1,6 +1,7 @@
 // ── Carregamento ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   carregarHospitais();
+  carregarMedicos();
 });
 
 // ── Cores ──────────────────────────────────────────────────────────────
@@ -43,6 +44,8 @@ let hospitalEditandoId = null;
 const modalHospital = document.getElementById('modalHospital');
 const inputBusca = document.getElementById('buscaHospital');
 const filtroTipo = document.getElementById('filtroTipoHosp');
+let todosHospitais = [];
+let clicouFora = false;
 
 inputBusca.addEventListener('input', buscarHospitais);
 filtroTipo.addEventListener('change', buscarHospitais);
@@ -62,8 +65,6 @@ document.getElementById('cancelarHospital').addEventListener('click', () => {
   modalHospital.classList.remove('open');
 });
 
-let clicouFora = false;
-
 modalHospital.addEventListener('mousedown', (e) => {
   clicouFora = e.target === modalHospital;
 });
@@ -80,8 +81,8 @@ document.querySelector('#modalHospital .modal').addEventListener('click', (e) =>
 });
 
 document.getElementById('salvarHospital').addEventListener('click', async () => {
-  const nome     = document.getElementById('hospNome').value.trim();
-  const tipo     = document.getElementById('hospTipo').value;
+  const nome = document.getElementById('hospNome').value.trim();
+  const tipo = document.getElementById('hospTipo').value;
   const endereco = document.getElementById('hospEndereco').value.trim();
 
   if (!nome || !tipo || !endereco) {
@@ -89,7 +90,7 @@ document.getElementById('salvarHospital').addEventListener('click', async () => 
     return;
   }
 
- const estaEditando = hospitalEditandoId;
+  const estaEditando = hospitalEditandoId;
 
   try {
     let res;
@@ -126,23 +127,30 @@ document.getElementById('salvarHospital').addEventListener('click', async () => 
 
 //─── Funcões do Hospitais ────────────────────────────────────────────────
 async function limparModalHospital() {
-  document.getElementById('hospNome').value     = '';
-  document.getElementById('hospTipo').value     = '';
+  document.getElementById('hospNome').value = '';
+  document.getElementById('hospTipo').value = '';
   document.getElementById('hospEndereco').value = '';
   hospitalEditandoId = null;
   document.getElementById('modalHospitalTitulo').innerText = 'Cadastrar hospital';
 }
 
 async function carregarHospitais() {
-  try {
-    const res = await fetch('https://api-atestado.onrender.com/hospital/');
-    const data = await res.json();
+  const res = await fetch('https://api-atestado.onrender.com/hospital/');
+  todosHospitais = await res.json();
+  renderHospitais(todosHospitais);
+}
 
-    renderHospitais(data);
+function buscarHospitais() {
+  const nome = inputBusca.value.toLowerCase().trim();
+  const tipo = filtroTipo.value;
 
-  } catch (error) {
-    console.error('Erro ao carregar hospitais:', error);
-  }
+  const filtrados = todosHospitais.filter(h => {
+    const matchNome = h.nome.toLowerCase().includes(nome);
+    const matchTipo = tipo ? h.tipo === tipo : true;
+    return matchNome && matchTipo;
+  });
+
+  renderHospitais(filtrados);
 }
 
 async function editarHospital(id) {
@@ -155,8 +163,8 @@ async function editarHospital(id) {
       return;
     }
 
-    document.getElementById('hospNome').value     = hospital.nome;
-    document.getElementById('hospTipo').value     = hospital.tipo;
+    document.getElementById('hospNome').value = hospital.nome;
+    document.getElementById('hospTipo').value = hospital.tipo;
     document.getElementById('hospEndereco').value = hospital.endereco;
     document.getElementById('modalHospitalTitulo').innerText = 'Editar hospital';
 
@@ -228,4 +236,296 @@ async function renderHospitais(data) {
     `;
     tbody.appendChild(tr);
   });
+}
+
+// ── MÉDICOS ───────────────────────────────────────────────────────────
+
+let medicoEditandoId = null;
+let todosMedicos = [];
+const modalMedico = document.getElementById('modalMedico');
+const inputBuscaMedico = document.getElementById('buscaMedico');
+const filtroStatusCrm = document.getElementById('filtroStatusCrm');
+
+inputBuscaMedico.addEventListener('input', filtrarMedicos);
+filtroStatusCrm.addEventListener('change', filtrarMedicos);
+
+document.getElementById('btnNovoMedico').addEventListener('click', () => {
+  limparModalMedico();
+  carregarHospitaisNoModal();
+  modalMedico.classList.add('open');
+});
+
+document.getElementById('fecharModalMedico').addEventListener('click', () => {
+  limparModalMedico();
+  modalMedico.classList.remove('open');
+});
+
+document.getElementById('cancelarMedico').addEventListener('click', () => {
+  limparModalMedico();
+  modalMedico.classList.remove('open');
+});
+
+document.getElementById('hospDropdownToggle').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const menu = document.getElementById('hospDropdownMenu');
+  const toggle = document.getElementById('hospDropdownToggle');
+  menu.classList.toggle('open');
+  toggle.classList.toggle('open');
+});
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.hosp-dropdown')) {
+    const menu = document.getElementById('hospDropdownMenu');
+    const toggle = document.getElementById('hospDropdownToggle');
+    if (menu) menu.classList.remove('open');
+    if (toggle) toggle.classList.remove('open');
+  }
+});
+
+let clicouForaMedico = false;
+
+modalMedico.addEventListener('mousedown', (e) => {
+  clicouForaMedico = e.target === modalMedico;
+});
+
+modalMedico.addEventListener('mouseup', (e) => {
+  if (clicouForaMedico && e.target === modalMedico) {
+    limparModalMedico();
+    modalMedico.classList.remove('open');
+  }
+});
+
+document.querySelector('#modalMedico .modal').addEventListener('click', (e) => {
+  e.stopPropagation();
+});
+
+document.getElementById('salvarMedico').addEventListener('click', async () => {
+  const nome = document.getElementById('medNome').value.trim();
+  const crm = document.getElementById('medCrm').value.trim();
+  const especialidade = document.getElementById('medEspecialidade').value.trim();
+  const statusCrm = document.getElementById('medStatusCrm').value;
+  const checkboxes = document.querySelectorAll('#hospDropdownMenu input[type="checkbox"]:checked');
+  const hospitaisSelecionados = Array.from(checkboxes).map(cb => Number(cb.value));
+
+  if (!nome || !especialidade) {
+    alert('Preencha todos os campos obrigatórios!');
+    return;
+  }
+
+  if (!medicoEditandoId && !crm) {
+    alert('Informe o CRM!');
+    return;
+  }
+
+  const estaEditando = medicoEditandoId;
+
+  try {
+    let res;
+    if (estaEditando) {
+      res = await fetch(`https://api-atestado.onrender.com/medico/id/${estaEditando}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, especialidade, statusCrm }),
+      });
+    } else {
+      res = await fetch('https://api-atestado.onrender.com/medico/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, crm, especialidade, statusCrm: 'Ativo' }),
+      });
+    }
+
+    const data = await res.json();
+    if (!res.ok) {
+      alert('Erro: ' + (data.error || res.statusText));
+      return;
+    }
+
+    if (!estaEditando) {
+      for (const hospitalId of hospitaisSelecionados) {
+        await fetch(`https://api-atestado.onrender.com/medico-hospital/medico/${data.id}/hospital/${hospitalId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
+    await carregarMedicos();
+    limparModalMedico();
+    modalMedico.classList.remove('open');
+    mostrarToast(estaEditando ? 'Médico atualizado!' : 'Médico cadastrado!');
+  } catch (error) {
+    alert('Erro: ' + error.message);
+  }
+});
+
+// ── Funções de médicos ────────────────────────────────────────────────
+
+async function carregarHospitaisNoModal() {
+  const menu = document.getElementById('hospDropdownMenu');
+  menu.innerHTML = '';
+
+  try {
+    const res = await fetch('https://api-atestado.onrender.com/hospital/');
+    const hospitais = await res.json();
+
+    hospitais.forEach(h => {
+      const label = document.createElement('label');
+      label.classList.add('hosp-dropdown-item');
+      label.innerHTML = `
+        <input type="checkbox" value="${h.id}" name="hospitalVinculo">
+        ${tipoIcon(h.tipo)}
+        <span>${h.nome}</span>
+      `;
+      menu.appendChild(label);
+    });
+
+    menu.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', atualizarLabelDropdown);
+    });
+
+  } catch (error) {
+    console.error('Erro ao carregar hospitais no modal:', error);
+  }
+}
+
+function atualizarLabelDropdown() {
+  const selecionados = Array.from(
+    document.querySelectorAll('#hospDropdownMenu input:checked')
+  ).map(c => c.closest('label').querySelector('span').textContent.trim());
+
+  document.getElementById('hospDropdownLabel').textContent =
+    selecionados.length ? selecionados.join(', ') : 'Selecionar hospitais...';
+}
+
+function limparModalMedico() {
+  document.getElementById('medNome').value = '';
+  document.getElementById('medCrm').value = '';
+  document.getElementById('medEspecialidade').value = '';
+  medicoEditandoId = null;
+  document.getElementById('modalMedicoTitulo').innerText = 'Cadastrar médico';
+  document.getElementById('medStatusCrm').value = 'Ativo';
+
+  const crmInput = document.getElementById('medCrm');
+  if (crmInput) crmInput.disabled = false;
+}
+
+async function carregarMedicos() {
+  try {
+    const res = await fetch('https://api-atestado.onrender.com/medico/');
+    const data = await res.json();
+    todosMedicos = data;
+    renderMedicos(todosMedicos);
+  } catch (error) {
+    console.error('Erro ao carregar médicos:', error);
+  }
+}
+
+let debounceTimer;
+function filtrarMedicos() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    const busca = inputBuscaMedico.value.toLowerCase().trim();
+    const status = filtroStatusCrm.value;
+
+    const filtrados = todosMedicos.filter(m => {
+      const matchNome = m.nome.toLowerCase().includes(busca) ||
+        m.crm.toLowerCase().includes(busca);
+      const matchStatus = status ? m.statusCrm === status : true;
+      return matchNome && matchStatus;
+    });
+
+    renderMedicos(filtrados);
+  }, 300);
+}
+
+let renderVersao = 0;
+
+async function renderMedicos(medicos) {
+  const versaoAtual = ++renderVersao;
+
+  const tbody = document.getElementById('tbodyMedicos');
+  tbody.innerHTML = '';
+
+  if (!medicos || medicos.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Nenhum médico cadastrado.</td></tr>';
+    return;
+  }
+
+  for (const m of medicos) {
+    // Se uma nova renderização começou, cancela esta
+    if (versaoAtual !== renderVersao) return;
+
+    const statusClass = m.statusCrm === 'Ativo' ? 'badge-ativo' : 'badge-inativo';
+
+    let hospitaisNomes = '—';
+    try {
+      const res = await fetch(`https://api-atestado.onrender.com/medico-hospital/medico/${m.id}/hospitais`);
+      if (res.ok) {
+        const vinculos = await res.json();
+        if (Array.isArray(vinculos) && vinculos.length > 0) {
+          const nomes = await Promise.all(vinculos.map(async v => {
+            const r = await fetch(`https://api-atestado.onrender.com/hospital/${v.hospitalId}`);
+            if (!r.ok) return '?';
+            const h = await r.json();
+            return h.nome;
+          }));
+          hospitaisNomes = nomes.join(', ');
+        }
+      }
+    } catch (e) {}
+
+    // Checa de novo após os awaits
+    if (versaoAtual !== renderVersao) return;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><div class="med-avatar">${iniciais(m.nome)}</div> ${m.nome}</td>
+      <td>${m.crm}</td>
+      <td>${m.especialidade}</td>
+      <td>${hospitaisNomes}</td>
+      <td>—</td>
+      <td><span class="badge ${statusClass}">${m.statusCrm}</span></td>
+      <td>
+        <button class="btn-outline" onclick="editarMedico(${m.id})">Editar</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+async function editarMedico(id) {
+  try {
+    const res = await fetch(`https://api-atestado.onrender.com/medico/id/${id}`);
+    const medico = await res.json();
+
+    await carregarHospitaisNoModal();
+
+    if (!res.ok) {
+      alert('Erro ao buscar médico: ' + medico.error);
+      return;
+    }
+
+    document.getElementById('medNome').value = medico.nome;
+    document.getElementById('medCrm').value = medico.crm;
+    document.getElementById('medEspecialidade').value = medico.especialidade;
+    document.getElementById('modalMedicoTitulo').innerText = 'Editar médico';
+    document.getElementById('medStatusCrm').value = medico.statusCrm;
+
+    const vinculos = await fetch(`https://api-atestado.onrender.com/medico-hospital/medico/${id}/hospitais`);
+    if (vinculos.ok) {
+      const data = await vinculos.json();
+      data.forEach(v => {
+        const checkbox = document.querySelector(`#hospDropdownMenu input[value="${v.hospitalId}"]`);
+        if (checkbox) checkbox.checked = true;
+      });
+    }
+
+    medicoEditandoId = id;
+    modalMedico.classList.add('open');
+    const crmInput = document.getElementById('medCrm');
+    if (crmInput) crmInput.disabled = true;
+  } catch (error) {
+    alert('Erro ao buscar médico: ' + error.message);
+  }
 }
