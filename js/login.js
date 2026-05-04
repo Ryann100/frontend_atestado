@@ -17,7 +17,7 @@ togglePw.addEventListener('click', () => {
 });
 
 // ── Limpar alerta ao digitar ──────────────────────────────────────────
-[document.getElementById('usuario'), senhaInput].forEach(el => {
+[document.getElementById('login'), senhaInput].forEach(el => {
   el.addEventListener('input', () => alertBox.classList.remove('visible'));
 });
 
@@ -25,11 +25,11 @@ togglePw.addEventListener('click', () => {
 form.addEventListener('submit', async (e) => {
   e.preventDefault(); // evita recarregar a página
 
-  const usuario = document.getElementById('usuario').value.trim(); // pega usuário
+  const login = document.getElementById('login').value.trim(); // pega usuário
   const senha   = senhaInput.value; // pega senha
 
   // validação básica
-  if (!usuario || !senha) {
+  if (!login || !senha) {
     alertMsg.textContent = 'Preencha usuário e senha para continuar.';
     alertBox.classList.add('visible');
     return;
@@ -41,13 +41,13 @@ form.addEventListener('submit', async (e) => {
 
   try {
     // 🔥 chamada pra sua API no Render
-    const response = await fetch("https://api-atestado.onrender.com/autenticacao/login", {
+    const response = await fetch("https://api-atestado.onrender.com/login/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        login: usuario,
+        login: login,
         senha: senha
       })
     });
@@ -59,7 +59,7 @@ form.addEventListener('submit', async (e) => {
       console.log("Login OK:", data);
 
       // (opcional) salvar usuário no navegador
-      localStorage.setItem("usuario", JSON.stringify(data.usuario));
+      localStorage.setItem("login", JSON.stringify(data.login));
 
       // redireciona
       window.location.href = "pages/home.html";
