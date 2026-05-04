@@ -452,31 +452,28 @@ async function renderMedicos(medicos) {
     return;
   }
 
-  for (const m of medicos) {
-    // Se uma nova renderização começou, cancela esta
-    if (versaoAtual !== renderVersao) return;
+  // Busca todos os vínculos de uma vez em paralelo
+  const vinculosPromises = medicos.map(m =>
+    fetch(`https://api-atestado.onrender.com/medico-hospital/medico/${m.id}/hospitais`)
+      .then(r => r.ok ? r.json() : [])
+      .catch(() => [])
+  );
 
+  const todosVinculos = await Promise.all(vinculosPromises);
+
+  if (versaoAtual !== renderVersao) return;
+
+  medicos.forEach((m, i) => {
     const statusClass = m.statusCrm === 'Ativo' ? 'badge-ativo' : 'badge-inativo';
 
-    let hospitaisNomes = '—';
-    try {
-      const res = await fetch(`https://api-atestado.onrender.com/medico-hospital/medico/${m.id}/hospitais`);
-      if (res.ok) {
-        const vinculos = await res.json();
-        if (Array.isArray(vinculos) && vinculos.length > 0) {
-          const nomes = await Promise.all(vinculos.map(async v => {
-            const r = await fetch(`https://api-atestado.onrender.com/hospital/${v.hospitalId}`);
-            if (!r.ok) return '?';
-            const h = await r.json();
-            return h.nome;
-          }));
-          hospitaisNomes = nomes.join(', ');
-        }
-      }
-    } catch (e) {}
-
-    // Checa de novo após os awaits
-    if (versaoAtual !== renderVersao) return;
+    // Usa todosHospitais que já está em memória, sem novo fetch
+    const vinculos = todosVinculos[i];
+    const hospitaisNomes = vinculos.length > 0
+      ? vinculos.map(v => {
+          const h = todosHospitais.find(h => h.id === v.hospitalId);
+          return h ? h.nome : '?';
+        }).join(', ')
+      : '—';
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -491,7 +488,7 @@ async function renderMedicos(medicos) {
       </td>
     `;
     tbody.appendChild(tr);
-  }
+  });
 }
 
 async function editarMedico(id) {
