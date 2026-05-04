@@ -1,64 +1,7 @@
-// ── Dados de colaboradores ────────────────────────────────────────────
-const COLABORADORES = {
-  '00412': {
-    matricula:  '00412',
-    nome:       'Ana Paula Santos',
-    setor:      'Logística',
-    unidade:    'Centro de Distribuição SP',
-    cargo:      'Operador de Logística',
-    contrato:   'CLT',
-    admissao:   '14/03/2019',
-    status:     'ativo',
-    historico: [
-      { cargo:'Operador de Logística', setor:'Logística', desde:'Jan/2023', atual:true  },
-      { cargo:'Auxiliar de Expedição', setor:'Logística', desde:'Mar/2019', atual:false },
-    ],
-    atestados: [
-      { tipo:'Médico',         emissao:'02/04/2025', inicio:'02/04/2025', fim:'04/04/2025', dias:3,   cid:'J06',  nri:false, status:'ok'   },
-      { tipo:'Comparecimento', emissao:'18/03/2025', inicio:'18/03/2025', fim:'—',          dias:null,cid:'Z00',  nri:false, status:'ok'   },
-      { tipo:'Médico',         emissao:'05/01/2025', inicio:'05/01/2025', fim:'06/01/2025', dias:2,   cid:'M54',  nri:false, status:'ok'   },
-      { tipo:'Médico',         emissao:'10/09/2024', inicio:'10/09/2024', fim:'11/09/2024', dias:2,   cid:'J06',  nri:false, status:'ok'   },
-      { tipo:'Comparecimento', emissao:'22/05/2024', inicio:'22/05/2024', fim:'—',          dias:null,cid:'Z00',  nri:false, status:'ok'   },
-    ],
-  },
-  '00891': {
-    matricula:  '00891',
-    nome:       'Carlos Mota',
-    setor:      'Operacional',
-    unidade:    'Filial Norte',
-    cargo:      'Operador',
-    contrato:   'CLT',
-    admissao:   '02/07/2020',
-    status:     'ativo',
-    historico: [
-      { cargo:'Operador',          setor:'Operacional', desde:'Jul/2020', atual:true  },
-    ],
-    atestados: [
-      { tipo:'Comparecimento', emissao:'05/04/2025', inicio:'05/04/2025', fim:'—',          dias:null,cid:'Z00', nri:false, status:'ok' },
-      { tipo:'Médico',         emissao:'12/11/2024', inicio:'12/11/2024', fim:'13/11/2024', dias:2,   cid:'M54', nri:false, status:'ok' },
-    ],
-  },
-  '00734': {
-    matricula:  '00734',
-    nome:       'João Ribeiro',
-    setor:      'Logística',
-    unidade:    'Centro de Distribuição SP',
-    cargo:      'Motorista',
-    contrato:   'CLT',
-    admissao:   '15/08/2018',
-    status:     'ativo',
-    historico: [
-      { cargo:'Motorista',          setor:'Logística', desde:'Jan/2021', atual:true  },
-      { cargo:'Auxiliar de Carga',  setor:'Logística', desde:'Ago/2018', atual:false },
-    ],
-    atestados: [
-      { tipo:'Médico', emissao:'12/04/2025', inicio:'12/04/2025', fim:'13/04/2025', dias:2,   cid:'F32', nri:true,  status:'warn' },
-      { tipo:'Médico', emissao:'03/02/2025', inicio:'03/02/2025', fim:'05/02/2025', dias:3,   cid:'F32', nri:true,  status:'warn' },
-      { tipo:'Médico', emissao:'10/12/2024', inicio:'10/12/2024', fim:'11/12/2024', dias:2,   cid:'F33', nri:true,  status:'warn' },
-      { tipo:'Médico', emissao:'05/09/2024', inicio:'05/09/2024', fim:'06/09/2024', dias:2,   cid:'F32', nri:true,  status:'warn' },
-    ],
-  },
-};
+// ── Inicialização ───────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  renderFicha(getMatricula());
+});
 
 // ── Cores dos avatares ─────────────────────────────────────────────────
 const CORES = ['#e03040','#2e6da4','#8e44ad','#e67e22','#27ae60','#16a085','#d35400','#2980b9'];
@@ -85,133 +28,177 @@ function badgeStatus(status) {
 }
 
 // ── Renderizar ficha ───────────────────────────────────────────────────
-function renderFicha(mat) {
-  const c = COLABORADORES[mat];
-  if (!c) {
-    document.querySelector('.content').innerHTML = `<div style="text-align:center;padding:60px;color:var(--text-muted)">Colaborador não encontrado.</div>`;
-    return;
+async function renderFicha(mat) {
+  try {
+    // ── Colaborador ──
+    const res = await fetch(`https://api-atestado.onrender.com/colaborador/matricula/${mat}`);
+    const data = await res.json();
+
+    const c = Array.isArray(data) ? data[0] : data;
+
+    if (!c) {
+      document.querySelector('.content').innerHTML = `
+        <div style="text-align:center;padding:60px;color:var(--text-muted)">
+          Colaborador não encontrado.
+        </div>`;
+      return;
+    }
+
+    const cor = corAvatar(c.nome);
+    const ini = iniciais(c.nome);
+
+    const setor = c.departamento;
+    const contrato = c.tipoContrato;
+    const admissao = new Date(c.dataAdmissao).toLocaleDateString('pt-BR');
+    const status = c.status ? 'ativo' : 'inativo';
+
+    document.getElementById('breadcrumbNome').textContent = c.nome;
+    document.title = `Ficha — ${c.nome}`;
+
+    document.getElementById('headerAv').textContent = ini;
+
+    document.getElementById('headerNome').textContent = c.nome;
+    document.getElementById('headerSub').textContent =
+      `${c.matricula} · ${c.cargo} · ${setor}`;
+
+    const statusBadge = status === 'ativo'
+      ? `<span class="badge-status badge-ativo">● Ativo</span>`
+      : `<span class="badge-status badge-inativo">● Inativo</span>`;
+
+    document.getElementById('headerBadges').innerHTML =
+      `${statusBadge}
+       <span class="badge-status badge-setor">${setor}</span>
+       <span class="badge-status badge-contrato">${contrato}</span>`;
+
+    document.getElementById('dadosLista').innerHTML = `
+      <div class="dado-item"><span class="dado-key">Matrícula</span><span class="dado-val">${c.matricula}</span></div>
+      <div class="dado-item"><span class="dado-key">Cargo</span><span class="dado-val">${c.cargo}</span></div>
+      <div class="dado-item"><span class="dado-key">Setor</span><span class="dado-val">${setor}</span></div>
+      <div class="dado-item"><span class="dado-key">Unidade</span><span class="dado-val">${c.unidade}</span></div>
+      <div class="dado-item"><span class="dado-key">Contrato</span><span class="dado-val">${contrato}</span></div>
+      <div class="dado-item"><span class="dado-key">Admissão</span><span class="dado-val">${admissao}</span></div>
+      <div class="dado-item"><span class="dado-key">Status</span><span class="dado-val">${status}</span></div>
+    `;
+
+    // ── ATESTADOS (NOVO) ──
+    const resAtestados = await fetch(
+      `https://api-atestado.onrender.com/atestado/matricula/${mat}`
+    );
+
+    const atestados = await resAtestados.json();
+
+    renderTabela(atestados);
+
+  } catch (err) {
+    console.error("Erro ao carregar ficha:", err);
   }
-
-  const cor = corAvatar(c.nome);
-  const ini = iniciais(c.nome);
-
-  // Breadcrumb
-  document.getElementById('breadcrumbNome').textContent = c.nome;
-  document.title = `Ficha — ${c.nome}`;
-
-  // Avatar e cabeçalho
-  const av = document.getElementById('headerAv');
-  av.textContent  = ini;
-  av.style.cssText = `background:color-mix(in srgb,${cor} 18%,transparent);border:2px solid color-mix(in srgb,${cor} 35%,transparent);color:${cor};width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;`;
-
-  document.getElementById('headerNome').textContent = c.nome;
-  document.getElementById('headerSub').textContent  = `${c.matricula} · ${c.cargo} · ${c.setor}`;
-
-  const statusBadge = c.status === 'ativo'
-    ? `<span class="badge-status badge-ativo">● Ativo</span>`
-    : `<span class="badge-status badge-inativo">● Inativo</span>`;
-  document.getElementById('headerBadges').innerHTML =
-    `${statusBadge}
-     <span class="badge-status badge-setor">${c.setor}</span>
-     <span class="badge-status badge-contrato">${c.contrato}</span>`;
-
-  // Botão novo atestado
-  document.getElementById('btnNovoAtestado').onclick = () => {
-    location.href = `novo-atestado.html?mat=${c.matricula}`;
-  };
-
-  // Dados cadastrais
-  const dados = [
-    ['Matrícula',    c.matricula],
-    ['Cargo atual',  c.cargo],
-    ['Setor',        c.setor],
-    ['Unidade',      c.unidade],
-    ['Contrato',     c.contrato],
-    ['Admissão',     c.admissao],
-    ['Status',       c.status === 'ativo' ? 'Ativo' : 'Inativo'],
-  ];
-  document.getElementById('dadosLista').innerHTML = dados.map(([k,v]) =>
-    `<div class="dado-item"><span class="dado-key">${k}</span><span class="dado-val">${v}</span></div>`
-  ).join('');
-
-  // Histórico de funções
-  document.getElementById('historicoLista').innerHTML = c.historico.map(h =>
-    `<div class="historico-item">
-      <div class="historico-dot ${h.atual ? 'atual' : 'ant'}"></div>
-      <div style="flex:1">
-        <div class="historico-cargo">${h.cargo}</div>
-        <div class="historico-detalhe">${h.setor} · desde ${h.desde}</div>
-      </div>
-      ${h.atual ? '<span class="historico-atual-badge">Atual</span>' : ''}
-    </div>`
-  ).join('');
-
-  // Resumo cards
-  const anoAtual   = new Date().getFullYear();
-  const atestAno   = c.atestados.filter(a => a.emissao.includes(String(anoAtual)));
-  const totalDias  = c.atestados.filter(a => a.dias).reduce((s,a) => s + a.dias, 0);
-  const totalNri   = c.atestados.filter(a => a.nri).length;
-  const totalComp  = c.atestados.filter(a => a.tipo === 'Comparecimento').length;
-
-  document.getElementById('resumoCards').innerHTML = `
-    <div class="resumo-card">
-      <div class="resumo-card-val">${c.atestados.length}</div>
-      <div class="resumo-card-label">Total geral</div>
-    </div>
-    <div class="resumo-card">
-      <div class="resumo-card-val">${atestAno.length}</div>
-      <div class="resumo-card-label">Em ${anoAtual}</div>
-    </div>
-    <div class="resumo-card">
-      <div class="resumo-card-val">${totalDias}</div>
-      <div class="resumo-card-label">Dias afastado</div>
-    </div>
-    <div class="resumo-card">
-      <div class="resumo-card-val ${totalNri > 0 ? 'danger' : ''}">${totalNri}</div>
-      <div class="resumo-card-label">CID F (NRI)</div>
-    </div>`;
-
-  // Alerta de reincidência
-  if (c.atestados.length >= 3) {
-    const alerta = document.getElementById('alertaReincidencia');
-    document.getElementById('alertaReincidenciaTexto').textContent =
-      `Atenção: ${c.nome} possui ${c.atestados.length} atestados registrados — colaborador com histórico de reincidência.`;
-    alerta.style.display = 'flex';
-  }
-
-  // Tabela de atestados
-  renderTabela(c.atestados);
-
-  // Filtro por ano
-  document.getElementById('filtroAno').addEventListener('change', function() {
-    const ano = this.value;
-    const filtrados = ano ? c.atestados.filter(a => a.emissao.includes(ano)) : c.atestados;
-    renderTabela(filtrados);
-  });
 }
 
 function renderTabela(atestados) {
   const tbody = document.getElementById('tbodyAtestados');
 
-  if (atestados.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="empty-msg">Nenhum atestado encontrado para o período.</td></tr>`;
+  if (!atestados || atestados.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="empty-msg">
+          Nenhum atestado encontrado.
+        </td>
+      </tr>`;
     return;
   }
 
   tbody.innerHTML = atestados.map(a => {
-    const cidHtml = a.nri ? `<span class="cid-nri">${a.cid} ⚠</span>` : (a.cid || '—');
-    const diasHtml = a.dias !== null ? a.dias : '—';
-    const afastamento = a.fim && a.fim !== '—' ? `${a.inicio} – ${a.fim}` : a.inicio;
-    return `<tr>
-      <td>${a.tipo}</td>
-      <td>${a.emissao}</td>
-      <td>${afastamento}</td>
-      <td>${diasHtml}</td>
-      <td>${cidHtml}</td>
-      <td>${badgeStatus(a.status)}</td>
-    </tr>`;
+    const emissao = new Date(a.dataEmissao).toLocaleDateString('pt-BR');
+
+    const inicio = new Date(a.dataInicio).toLocaleDateString('pt-BR');
+
+    const fim = a.dataFim
+      ? new Date(a.dataFim).toLocaleDateString('pt-BR')
+      : null;
+
+    const afastamento = fim ? `${inicio} – ${fim}` : inicio;
+
+    return `
+      <tr>
+        <td>${a.tipo?.tipo || '—'}</td>
+        <td>${emissao}</td>
+        <td>${afastamento}</td>
+        <td>${a.quantidadeDias ?? '—'}</td>
+        <td>${a.cid ?? '—'}</td>
+        <td><span class="badge badge-info">Registrado</span></td>
+      </tr>
+    `;
   }).join('');
 }
+
+// ── Modal de edição ─────────────────────────────────────────────────
+const modalEditar = document.getElementById('modalEditarOverlay');
+
+const editNome = document.getElementById('editNome');
+const editCargo = document.getElementById('editCargo');
+const editDepartamento = document.getElementById('editDepartamento');
+const editUnidade = document.getElementById('editUnidade');
+const editContrato = document.getElementById('editContrato');
+const editTurno = document.getElementById('editTurno');
+
+document.getElementById('btnEditarColab').onclick = async () => {
+  const mat = getMatricula();
+
+  const res = await fetch(`https://api-atestado.onrender.com/colaborador/matricula/${mat}`);
+  const data = await res.json();
+  const c = Array.isArray(data) ? data[0] : data;
+
+  editNome.value = c.nome || '';
+  editCargo.value = c.cargo || '';
+  editDepartamento.value = c.departamento || '';
+  editUnidade.value = c.unidade || '';
+  editContrato.value = c.tipoContrato || '';
+  editTurno.value = c.turno || '';
+
+  modalEditar.classList.add('open');
+};
+
+function fecharModalEditar() {
+  modalEditar.classList.remove('open');
+}
+
+document.getElementById('fecharModalEditar').onclick = fecharModalEditar;
+document.getElementById('cancelarEditar').onclick = fecharModalEditar;
+
+modalEditar.addEventListener('click', e => {
+  if (e.target === modalEditar) fecharModalEditar();
+});
+
+document.getElementById('salvarEditar').onclick = async () => {
+  const mat = getMatricula();
+
+  const body = {
+    nome: editNome.value,
+    cargo: editCargo.value,
+    departamento: editDepartamento.value,
+    unidade: editUnidade.value,
+    tipoContrato: editContrato.value,
+    turno: editTurno.value
+  };
+
+  try {
+    const res = await fetch(`https://api-atestado.onrender.com/colaborador/${mat}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) throw new Error();
+
+    fecharModalEditar();
+
+    // 🔥 atualiza a tela sem reload
+    renderFicha(mat);
+
+  } catch (err) {
+    alert('Erro ao atualizar colaborador');
+  }
+};
 
 // ── Sidebar mobile ────────────────────────────────────────────────────
 const sidebar        = document.getElementById('sidebar');
@@ -226,6 +213,3 @@ sidebarOverlay.addEventListener('click', () => {
   sidebar.classList.remove('open');
   sidebarOverlay.classList.remove('open');
 });
-
-// ── Init ───────────────────────────────────────────────────────────────
-renderFicha(getMatricula());
