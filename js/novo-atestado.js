@@ -1,95 +1,160 @@
-// ── Dados de colaboradores (substituir pela API real) ─────────────────
-const COLABORADORES = [
-  { matricula:'00412', nome:'Ana Paula Santos',  setor:'Logística',      cargo:'Auxiliar de Expedição', status:'ativo' },
-  { matricula:'00891', nome:'Carlos Mota',        setor:'Operacional',    cargo:'Operador',              status:'ativo' },
-  { matricula:'01102', nome:'Fernanda Torres',    setor:'Administrativo', cargo:'Analista',              status:'ativo' },
-  { matricula:'00734', nome:'João Ribeiro',       setor:'Logística',      cargo:'Motorista',             status:'ativo' },
-  { matricula:'01204', nome:'Marcos Lima',        setor:'Operacional',    cargo:'Técnico',               status:'ativo' },
-  { matricula:'00556', nome:'Patricia Henrique',  setor:'Financeiro',     cargo:'Assistente',            status:'ativo' },
-  { matricula:'00321', nome:'Rafael Souza',       setor:'RH',             cargo:'Analista de RH',        status:'ativo' },
-  { matricula:'00678', nome:'Camila Ferreira',    setor:'Logística',      cargo:'Auxiliar',              status:'ativo' },
-  { matricula:'00990', nome:'Bruno Costa',        setor:'Operacional',    cargo:'Operador Sênior',       status:'ativo' },
-  { matricula:'01350', nome:'Larissa Campos',     setor:'Administrativo', cargo:'Coordenadora',          status:'ativo' },
-];
+// ── Init ───────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  carregarDados();
+});
 
-// ── Descrições de CID (simplificado) ──────────────────────────────────
-const CID_DESCRICOES = {
-  'J06': 'Infecção aguda das vias aéreas superiores',
-  'J11': 'Influenza (gripe)',
-  'M54': 'Dorsalgia / Dor nas costas',
-  'Z00': 'Exame geral / Consulta',
-  'Z34': 'Supervisão de gravidez normal',
-  'F32': 'Episódio depressivo',
-  'F33': 'Transtorno depressivo recorrente',
-  'F41': 'Transtorno de ansiedade',
-  'K21': 'Refluxo gastroesofágico',
-  'L30': 'Dermatite',
-};
+// ── Estado ─────────────────────────────────────────────────────────────
+let colaboradorSelecionado = null;
+let tipoSelecionado = null;
+let medicoSelecionado = null;
+let todosColaboradores = [];
+let todosHospitais = [];
+let todosMedicos = [];
 
-// ── Dias automáticos por tipo ──────────────────────────────────────────
-const DIAS_FIXOS = {
-  'Maternidade':      120,
-  'Paternidade':      5,
-  'Casamento':        5,
-  'Luto':             2,
-  'Doação de Sangue': 1,
-};
+// ── Elementos ──────────────────────────────────────────────────────────
+const inputColab = document.getElementById('inputColaborador');
+const autoList = document.getElementById('autocompleteList');
+const colabCard = document.getElementById('colabCard');
+const colabAv = document.getElementById('colabAv');
+const colabNome = document.getElementById('colabNome');
+const colabDetalhes = document.getElementById('colabDetalhes');
+const btnClearColab = document.getElementById('btnClearColab');
+
+const dataEmissao = document.getElementById('dataEmissao');
+const competencia = document.getElementById('competencia');
+const dataInicio = document.getElementById('dataInicio');
+const dataFim = document.getElementById('dataFim');
+const diasAfastamento = document.getElementById('diasAfastamento');
+const groupHoras = document.getElementById('groupHoras');
+const inputHoras = document.getElementById('inputHoras');
+
+const inputCid = document.getElementById('inputCid');
+const cidDescricao = document.getElementById('cidDescricao');
+const alertNri = document.getElementById('alertNri');
+const inputCrm = document.getElementById('inputCrm');
+const crmStatus = document.getElementById('crmStatus');
+const crmList = document.getElementById('crmList');
+
+const uploadBox = document.getElementById('uploadBox');
+const inputArquivo = document.getElementById('inputArquivo');
+const uploadPreview = document.getElementById('uploadPreview');
+const uploadNome = document.getElementById('uploadNomeArquivo');
+const btnRemoverArq = document.getElementById('btnRemoverArquivo');
+
+const form = document.getElementById('formAtestado');
+const btnSalvar = document.getElementById('btnSalvar');
 
 // ── Cores dos avatares ─────────────────────────────────────────────────
-const CORES = ['#e03040','#2e6da4','#8e44ad','#e67e22','#27ae60','#16a085','#d35400','#2980b9'];
+const CORES = ['#e03040', '#2e6da4', '#8e44ad', '#e67e22', '#27ae60', '#16a085', '#d35400', '#2980b9'];
 function corAvatar(nome) {
   let h = 0;
   for (let i = 0; i < nome.length; i++) h = nome.charCodeAt(i) + ((h << 5) - h);
   return CORES[Math.abs(h) % CORES.length];
 }
 function iniciais(nome) {
-  return nome.split(' ').slice(0,2).map(p => p[0]).join('').toUpperCase();
+  return nome.split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
 }
 
-// ── Estado ─────────────────────────────────────────────────────────────
-let colaboradorSelecionado = null;
-let tipoSelecionado        = null;
+// ── Ícones por tipo ────────────────────────────────────────────────────
+function iconeParaTipo(nomeTipo) {
+  const mapa = {
+    'Médico': `<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>`,
+    'Comparecimento': `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`,
+    'Maternidade': `<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>`,
+    'Paternidade': `<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>`,
+    'Luto': `<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>`,
+    'Casamento': `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>`,
+    'Doação de Sangue': `<path d="M12 2C6 8 4 12 4 15a8 8 0 0 0 16 0c0-3-2-7-8-13z"/>`,
+    'Doença Ocupacional': `<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>`,
+  };
+  return mapa[nomeTipo] || `<circle cx="12" cy="12" r="10"/>`;
+}
 
-// ── Elementos ──────────────────────────────────────────────────────────
-const inputColab    = document.getElementById('inputColaborador');
-const autoList      = document.getElementById('autocompleteList');
-const colabCard     = document.getElementById('colabCard');
-const colabAv       = document.getElementById('colabAv');
-const colabNome     = document.getElementById('colabNome');
-const colabDetalhes = document.getElementById('colabDetalhes');
-const btnClearColab = document.getElementById('btnClearColab');
+// ── Carregar dados iniciais ────────────────────────────────────────────
+async function carregarDados() {
+  try {
+    const [resColabs, resTipos, resHospitais, resMedicos] = await Promise.all([
+      fetch('https://api-atestado.onrender.com/colaborador/'),
+      fetch('https://api-atestado.onrender.com/tipo-atestado/'),
+      fetch('https://api-atestado.onrender.com/hospital/'),
+      fetch('https://api-atestado.onrender.com/medico/')
+    ]);
 
-const dataEmissao   = document.getElementById('dataEmissao');
-const competencia   = document.getElementById('competencia');
-const dataInicio    = document.getElementById('dataInicio');
-const dataFim       = document.getElementById('dataFim');
-const diasAfastamento = document.getElementById('diasAfastamento');
-const groupHoras    = document.getElementById('groupHoras');
-const inputHoras    = document.getElementById('inputHoras');
+    todosColaboradores = await resColabs.json();
+    const tipos = await resTipos.json();
+    todosHospitais = await resHospitais.json();
+    todosMedicos = await resMedicos.json();
 
-const inputCid      = document.getElementById('inputCid');
-const cidDescricao  = document.getElementById('cidDescricao');
-const alertNri      = document.getElementById('alertNri');
-const inputCrm      = document.getElementById('inputCrm');
-const crmStatus     = document.getElementById('crmStatus');
+    gerarBotoesTipo(tipos);
+    popularSelectHospital();
+  } catch (error) {
+    console.error('Erro ao carregar dados:', error);
+  }
+}
 
-const uploadBox     = document.getElementById('uploadBox');
-const inputArquivo  = document.getElementById('inputArquivo');
-const uploadPreview = document.getElementById('uploadPreview');
-const uploadNome    = document.getElementById('uploadNomeArquivo');
-const btnRemoverArq = document.getElementById('btnRemoverArquivo');
+// ── Gerar botões de tipo dinamicamente ────────────────────────────────
+function gerarBotoesTipo(tipos) {
+  const tipoGrid = document.getElementById('tipoGrid');
+  tipoGrid.innerHTML = '';
 
-const form          = document.getElementById('formAtestado');
-const btnSalvar     = document.getElementById('btnSalvar');
+  tipos.forEach(t => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'tipo-btn';
+    btn.dataset.id = t.id;
+    btn.dataset.tipo = t.tipo;
 
-// ══════════════════════════════════════════════════════════════════════
+    btn.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="20" height="20">
+        ${iconeParaTipo(t.tipo)}
+      </svg>
+      ${t.tipo}
+    `;
+
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const dias = Number(t.diasAfastamento ?? 0);
+
+      tipoSelecionado = {
+        id: t.id,
+        tipo: t.tipo,
+        diasAfastamento: dias > 0 ? dias : null
+      };
+
+      document.getElementById('tipoSelecionado').value = t.id;
+
+      atualizarCamposTipo();
+
+      if (tipoSelecionado.diasAfastamento) {
+        preencherDataFimAutomatica();
+        calcularDias();
+      }
+    });
+
+    tipoGrid.appendChild(btn);
+  });
+}
+
+// ── Popular select de hospital ─────────────────────────────────────────
+function popularSelectHospital() {
+  const select = document.getElementById('selectHospital');
+  select.innerHTML = '<option value="">Selecione...</option>';
+  todosHospitais.forEach(h => {
+    const opt = document.createElement('option');
+    opt.value = h.id;
+    opt.textContent = h.nome;
+    select.appendChild(opt);
+  });
+}
+
 // COLABORADOR — autocomplete
-// ══════════════════════════════════════════════════════════════════════
 inputColab.addEventListener('input', () => {
   const q = inputColab.value.toLowerCase().trim();
   if (!q) { autoList.classList.remove('open'); return; }
 
-  const resultados = COLABORADORES.filter(c =>
+  const resultados = todosColaboradores.filter(c =>
     c.nome.toLowerCase().includes(q) || c.matricula.includes(q)
   ).slice(0, 5);
 
@@ -102,7 +167,7 @@ inputColab.addEventListener('input', () => {
       <div class="autocomplete-av" style="--c:${cor}">${ini}</div>
       <div>
         <div class="autocomplete-nome">${c.nome}</div>
-        <div class="autocomplete-sub">${c.matricula} · ${c.setor} · ${c.cargo}</div>
+        <div class="autocomplete-sub">${c.matricula} · ${c.departamento} · ${c.cargo}</div>
       </div>
     </div>`;
   }).join('');
@@ -112,8 +177,7 @@ inputColab.addEventListener('input', () => {
 autoList.addEventListener('click', e => {
   const item = e.target.closest('.autocomplete-item');
   if (!item) return;
-  const mat  = item.dataset.mat;
-  const colab = COLABORADORES.find(c => c.matricula === mat);
+  const colab = todosColaboradores.find(c => c.matricula === item.dataset.mat);
   selecionarColaborador(colab);
 });
 
@@ -132,10 +196,10 @@ function selecionarColaborador(colab) {
   const ini = iniciais(colab.nome);
 
   colabAv.textContent = ini;
-  colabAv.style.cssText = `background: color-mix(in srgb,${cor} 20%,transparent); border: 1.5px solid color-mix(in srgb,${cor} 40%,transparent); color:${cor}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;`;
-  colabNome.textContent    = colab.nome;
-  colabDetalhes.textContent = `${colab.matricula} · ${colab.setor} · ${colab.cargo}`;
-  colabCard.style.display  = 'flex';
+  colabAv.style.cssText = `background:color-mix(in srgb,${cor} 20%,transparent);border:1.5px solid color-mix(in srgb,${cor} 40%,transparent);color:${cor};width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;`;
+  colabNome.textContent = colab.nome;
+  colabDetalhes.textContent = `${colab.matricula} · ${colab.departamento} · ${colab.cargo}`;
+  colabCard.style.display = 'flex';
   document.querySelector('.input-search-wrap').style.display = 'none';
 }
 
@@ -147,37 +211,34 @@ btnClearColab.addEventListener('click', () => {
   inputColab.focus();
 });
 
-// ══════════════════════════════════════════════════════════════════════
-// TIPO DE AFASTAMENTO
-// ══════════════════════════════════════════════════════════════════════
-document.querySelectorAll('.tipo-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    tipoSelecionado = btn.dataset.tipo;
-    document.getElementById('tipoSelecionado').value = tipoSelecionado;
-    atualizarCamposTipo();
-  });
-});
-
+// TIPO — atualizar campos
 function atualizarCamposTipo() {
-  const isComparec = tipoSelecionado === 'Comparecimento';
+  if (!groupHoras || !dataFim || !diasAfastamento || !competencia) {
+    console.error("Elementos do DOM não encontrados:", {
+      groupHoras,
+      dataFim,
+      diasAfastamento,
+      competencia
+    });
+    return;
+  }
 
-  groupHoras.style.display = isComparec ? 'flex' : 'none';
+  const isComparec = tipoSelecionado?.tipo === 'Comparecimento';
 
-  // Limpa os campos de data ao trocar o tipo
+  groupHoras.style.display = 'block';
+
   dataEmissao.value = '';
-  dataInicio.value  = '';
-  dataFim.value     = '';
+  dataInicio.value = '';
+  dataFim.value = '';
   competencia.value = '';
 
-  if (DIAS_FIXOS[tipoSelecionado]) {
-    diasAfastamento.value = `${DIAS_FIXOS[tipoSelecionado]} dia(s)`;
-    dataFim.readOnly = false;
-    dataFim.classList.remove('readonly');
+  if (tipoSelecionado?.diasAfastamento) {
+    diasAfastamento.value = `${tipoSelecionado.diasAfastamento} dia(s)`;
+    dataFim.readOnly = true;
+    dataFim.classList.add('readonly');
   } else if (isComparec) {
     diasAfastamento.value = '—';
-    dataFim.value    = '';
+    dataFim.value = '';
     dataFim.readOnly = true;
     dataFim.classList.add('readonly');
   } else {
@@ -188,46 +249,39 @@ function atualizarCamposTipo() {
 }
 
 function preencherDataFimAutomatica() {
-  if (!dataInicio.value || !DIAS_FIXOS[tipoSelecionado]) return;
-  const inicio = new Date(dataInicio.value);
-  inicio.setDate(inicio.getDate() + DIAS_FIXOS[tipoSelecionado] - 1);
+  if (!dataInicio.value || !tipoSelecionado?.diasAfastamento) return;
+  const inicio = new Date(dataInicio.value + 'T12:00:00');
+  inicio.setDate(inicio.getDate() + tipoSelecionado.diasAfastamento - 1);
   dataFim.value = inicio.toISOString().split('T')[0];
 }
 
-// ══════════════════════════════════════════════════════════════════════
-// DATAS — competência e dias
-// ══════════════════════════════════════════════════════════════════════
+// DATAS
 dataEmissao.addEventListener('change', calcularCompetencia);
 dataInicio.addEventListener('change', () => {
-  if (DIAS_FIXOS[tipoSelecionado]) preencherDataFimAutomatica();
+  if (tipoSelecionado?.diasAfastamento) preencherDataFimAutomatica();
   calcularDias();
 });
 dataFim.addEventListener('change', calcularDias);
 
 function calcularCompetencia() {
   if (!dataEmissao.value) { competencia.value = ''; return; }
-  const d  = new Date(dataEmissao.value + 'T12:00:00');
+  const d = new Date(dataEmissao.value + 'T12:00:00');
   const dia = d.getDate();
-  let mesComp, anoComp;
+  let mesComp = d.getMonth();
+  let anoComp = d.getFullYear();
 
-  if (dia <= 15) {
-    // Competência do mês atual
-    mesComp = d.getMonth();
-    anoComp = d.getFullYear();
-  } else {
-    // Competência do próximo mês
-    mesComp = d.getMonth() + 1;
-    anoComp = d.getFullYear();
+  if (dia > 15) {
+    mesComp++;
     if (mesComp > 11) { mesComp = 0; anoComp++; }
   }
 
-  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
   competencia.value = `${meses[mesComp]}/${anoComp}`;
 }
 
 function calcularDias() {
-  if (tipoSelecionado === 'Comparecimento') { diasAfastamento.value = '—'; return; }
-  if (DIAS_FIXOS[tipoSelecionado]) return; // já preenchido
+  if (tipoSelecionado?.tipo === 'Comparecimento') { diasAfastamento.value = '—'; return; }
+  if (tipoSelecionado?.diasAfastamento) return;
   if (!dataInicio.value || !dataFim.value) { diasAfastamento.value = ''; return; }
 
   const ini = new Date(dataInicio.value + 'T12:00:00');
@@ -238,19 +292,27 @@ function calcularDias() {
   diasAfastamento.value = `${diff} dia(s)`;
 }
 
-// ══════════════════════════════════════════════════════════════════════
-// CID — alerta NRI e descrição
-// ══════════════════════════════════════════════════════════════════════
+// CID
+const CID_DESCRICOES = {
+  'J06': 'Infecção aguda das vias aéreas superiores',
+  'J11': 'Influenza (gripe)',
+  'M54': 'Dorsalgia / Dor nas costas',
+  'Z00': 'Exame geral / Consulta',
+  'Z34': 'Supervisão de gravidez normal',
+  'F32': 'Episódio depressivo',
+  'F33': 'Transtorno depressivo recorrente',
+  'F41': 'Transtorno de ansiedade',
+  'K21': 'Refluxo gastroesofágico',
+  'L30': 'Dermatite',
+};
+
 inputCid.addEventListener('input', () => {
   const cid = inputCid.value.toUpperCase().trim();
   inputCid.value = cid;
 
-  // Descrição
   const desc = CID_DESCRICOES[cid];
   cidDescricao.textContent = desc || '';
-  cidDescricao.style.color = desc ? 'var(--text-muted)' : '';
 
-  // Alerta NRI para CID categoria F
   if (cid.startsWith('F') && cid.length >= 3) {
     alertNri.style.display = 'flex';
     inputCid.style.borderColor = 'var(--danger)';
@@ -260,95 +322,99 @@ inputCid.addEventListener('input', () => {
   }
 });
 
-// ══════════════════════════════════════════════════════════════════════
-// CRM — validação simulada
-// ══════════════════════════════════════════════════════════════════════
-const CRM_VALIDOS = ['CRM/SP 12345', 'CRM/SP 54321', 'CRM/SP 11111'];
-
-inputCrm.addEventListener('blur', () => {
+// CRM — busca médico na API
+inputCrm.addEventListener('blur', async () => {
   const crm = inputCrm.value.trim().toUpperCase();
   if (!crm) { crmStatus.textContent = ''; crmStatus.className = 'crm-status'; return; }
 
-  if (CRM_VALIDOS.includes(crm)) {
-    crmStatus.textContent = '✓ Válido';
-    crmStatus.className   = 'crm-status valido';
-    inputCrm.style.paddingRight = '80px';
-  } else {
-    crmStatus.textContent = '✗ Não encontrado';
-    crmStatus.className   = 'crm-status invalido';
-    inputCrm.style.paddingRight = '120px';
+  try {
+    const res = await fetch(`https://api-atestado.onrender.com/medico/crm/${crm}`);
+    if (res.ok) {
+      const medico = await res.json();
+      medicoSelecionado = medico;
+      crmStatus.textContent = `✓ ${medico.nome}`;
+      crmStatus.className = 'crm-status valido';
+
+      // Preenche nome do médico automaticamente
+      document.getElementById('inputNomeMedico').value = medico.nome;
+    } else {
+      crmStatus.textContent = '✗ Não encontrado';
+      crmStatus.className = 'crm-status invalido';
+      document.getElementById('inputNomeMedico').value = '';
+    }
+  } catch {
+    crmStatus.textContent = '✗ Erro ao buscar';
+    crmStatus.className = 'crm-status invalido';
   }
 });
 
-// ══════════════════════════════════════════════════════════════════════
-// UPLOAD DE ARQUIVO
-// ══════════════════════════════════════════════════════════════════════
-uploadBox.addEventListener('click', () => alert('Este campo está em desenvolvimento.'));
 
+// UPLOAD
+uploadBox.addEventListener('click', () => inputArquivo.click());
 uploadBox.addEventListener('dragover', e => {
   e.preventDefault();
   uploadBox.style.borderColor = 'var(--accent)';
-  uploadBox.style.background  = 'rgba(224,48,64,0.06)';
 });
 uploadBox.addEventListener('dragleave', () => {
   uploadBox.style.borderColor = '';
-  uploadBox.style.background  = '';
 });
 uploadBox.addEventListener('drop', e => {
   e.preventDefault();
   uploadBox.style.borderColor = '';
-  uploadBox.style.background  = '';
   if (e.dataTransfer.files[0]) exibirArquivo(e.dataTransfer.files[0]);
 });
-
 inputArquivo.addEventListener('change', () => {
   if (inputArquivo.files[0]) exibirArquivo(inputArquivo.files[0]);
 });
 
 function exibirArquivo(file) {
-  uploadNome.textContent      = file.name;
-  uploadBox.style.display     = 'none';
+  uploadNome.textContent = file.name;
+  uploadBox.style.display = 'none';
   uploadPreview.style.display = 'flex';
 }
 
 btnRemoverArq.addEventListener('click', () => {
-  inputArquivo.value          = '';
+  inputArquivo.value = '';
   uploadPreview.style.display = 'none';
-  uploadBox.style.display     = 'flex';
+  uploadBox.style.display = 'flex';
 });
 
-// ══════════════════════════════════════════════════════════════════════
 // SUBMIT
-// ══════════════════════════════════════════════════════════════════════
 form.addEventListener('submit', async e => {
   e.preventDefault();
 
-  // Validações básicas
   if (!colaboradorSelecionado) {
-    inputColab.focus();
-    shakeField(document.querySelector('.input-search-wrap .form-input') || inputColab);
-    return;
+    shakeField(inputColab); return;
   }
   if (!tipoSelecionado) {
     const tipoGrid = document.getElementById('tipoGrid');
     tipoGrid.style.border = '1.5px solid var(--danger)';
     tipoGrid.style.borderRadius = '10px';
     tipoGrid.style.padding = '10px';
-    tipoGrid.scrollIntoView({ behavior:'smooth', block:'center' });
-    setTimeout(() => {
-      tipoGrid.style.border = '';
-      tipoGrid.style.padding = '';
-    }, 2000);
+    tipoGrid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => { tipoGrid.style.border = ''; tipoGrid.style.padding = ''; }, 2000);
     return;
   }
-  if (!dataEmissao.value) {
-    shakeField(dataEmissao); return;
-  }
-  if (!dataInicio.value) {
-    shakeField(dataInicio); return;
-  }
+  if (!dataEmissao.value) { shakeField(dataEmissao); return; }
+  if (!dataInicio.value) { shakeField(dataInicio); return; }
 
-  // Simula salvamento
+  const hospitalId = document.getElementById('selectHospital').value;
+  const isComparec = tipoSelecionado.tipo === 'Comparecimento';
+
+  const payload = {
+    matricula: colaboradorSelecionado.matricula,
+    dataEmissao: new Date(dataEmissao.value + 'T12:00:00.000Z'),
+    dataInicio: new Date(dataInicio.value + 'T12:00:00.000Z'),
+    dataFim: dataFim.value ? new Date(dataFim.value + 'T12:00:00.000Z') : undefined,
+    horaInicio: isComparec ? (inputHoras.value || '00:00') : '00:00',
+    horaFim: undefined,
+    cid: inputCid.value.trim().toUpperCase() || undefined,
+    tipoId: tipoSelecionado.id,
+    hospitalId: hospitalId ? Number(hospitalId) : undefined,
+    medicoId: medicoSelecionado?.id || undefined,
+    observacoes: document.getElementById('observacoes').value.trim() || undefined,
+  };
+
   btnSalvar.disabled = true;
   btnSalvar.innerHTML = `
     <svg class="spinner-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
@@ -356,13 +422,37 @@ form.addEventListener('submit', async e => {
     </svg>
     Salvando...`;
 
-  await new Promise(r => setTimeout(r, 1500));
+  try {
+    console.log('payload:', JSON.stringify(payload));
 
-  // Toast de sucesso
-  mostrarToast('Atestado cadastrado com sucesso!');
+    const res = await fetch('https://api-atestado.onrender.com/atestado/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
-  // Redireciona após 1.5s
-  setTimeout(() => location.href = 'atestados.html', 1500);
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert('Erro: ' + (data.error || res.statusText));
+      btnSalvar.disabled = false;
+      btnSalvar.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+        Salvar atestado`;
+      return;
+    }
+
+    mostrarToast('Atestado cadastrado com sucesso!');
+    setTimeout(() => location.href = 'atestados.html', 1500);
+
+  } catch (error) {
+    alert('Erro: ' + error.message);
+    btnSalvar.disabled = false;
+  }
 });
 
 function shakeField(el) {
@@ -386,9 +476,9 @@ function mostrarToast(msg) {
   setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 2500);
 }
 
-// ── Sidebar mobile ────────────────────────────────────────────────────
-const sidebar        = document.getElementById('sidebar');
-const menuToggle     = document.getElementById('menuToggle');
+// ── Sidebar mobile ─────────────────────────────────────────────────────
+const sidebar = document.getElementById('sidebar');
+const menuToggle = document.getElementById('menuToggle');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
 
 menuToggle.addEventListener('click', () => {
@@ -399,6 +489,3 @@ sidebarOverlay.addEventListener('click', () => {
   sidebar.classList.remove('open');
   sidebarOverlay.classList.remove('open');
 });
-
-// ── Campos de data sem valor padrão — usuário preenche manualmente ────
-// Apenas calcula automaticamente quando o usuário digitar

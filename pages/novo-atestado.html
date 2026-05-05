@@ -169,69 +169,6 @@
             </div>
           </div>
           <div class="tipo-grid" id="tipoGrid">
-            <button type="button" class="tipo-btn" data-tipo="Médico">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                width="20" height="20">
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-              </svg>
-              Médico
-            </button>
-            <button type="button" class="tipo-btn" data-tipo="Comparecimento">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                width="20" height="20">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-              Comparecimento
-            </button>
-            <button type="button" class="tipo-btn" data-tipo="Maternidade">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                width="20" height="20">
-                <path
-                  d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
-              Maternidade
-            </button>
-            <button type="button" class="tipo-btn" data-tipo="Paternidade">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                width="20" height="20">
-                <circle cx="12" cy="8" r="4" />
-                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-              </svg>
-              Paternidade
-            </button>
-            <button type="button" class="tipo-btn" data-tipo="Luto">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                width="20" height="20">
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5" />
-                <path d="M2 12l10 5 10-5" />
-              </svg>
-              Luto
-            </button>
-            <button type="button" class="tipo-btn" data-tipo="Casamento">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                width="20" height="20">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-              Casamento
-            </button>
-            <button type="button" class="tipo-btn" data-tipo="Doação de Sangue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                width="20" height="20">
-                <path d="M12 2C6 8 4 12 4 15a8 8 0 0 0 16 0c0-3-2-7-8-13z" />
-              </svg>
-              Doação de Sangue
-            </button>
-            <button type="button" class="tipo-btn" data-tipo="Doença Ocupacional">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                width="20" height="20">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                <line x1="12" y1="9" x2="12" y2="13" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
-              Doença Ocupacional
-            </button>
           </div>
           <input type="hidden" id="tipoSelecionado">
         </div>
@@ -255,10 +192,9 @@
               <label class="form-label">Competência</label>
               <input type="text" class="form-input readonly" id="competencia" placeholder="Automático" readonly>
             </div>
-            <div class="form-group" id="groupHoras" style="display:none">
-              <label class="form-label">Horas <span class="required">*</span></label>
+            <div class="form-group">
+              <label class="form-label">Hora Início <span class="required">*</span></label>
               <input type="text" class="form-input" id="inputHoras" placeholder="Ex: 2h30">
-              <span class="form-hint">Somente para comparecimento</span>
             </div>
           </div>
           <div class="form-grid-3" id="gridDatasAfastamento">
@@ -271,9 +207,11 @@
               <input type="date" class="form-input" id="dataFim">
               <span class="form-hint">Vazio = comparecimento</span>
             </div>
-            <div class="form-group">
-              <label class="form-label">Dias de afastamento</label>
-              <input type="text" class="form-input readonly" id="diasAfastamento" placeholder="Automático" readonly>
+            <div id="groupHoras">
+              <div class="form-group">
+                <label class="form-label">Dias de afastamento</label>
+                <input type="text" class="form-input readonly" id="diasAfastamento" placeholder="Automático" readonly>
+              </div>
             </div>
           </div>
         </div>
