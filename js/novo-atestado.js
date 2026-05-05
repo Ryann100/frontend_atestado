@@ -325,26 +325,44 @@ inputCid.addEventListener('input', () => {
 // CRM — busca médico na API
 inputCrm.addEventListener('blur', async () => {
   const crm = inputCrm.value.trim().toUpperCase();
-  if (!crm) { crmStatus.textContent = ''; crmStatus.className = 'crm-status'; return; }
+
+  if (!crm) {
+    crmStatus.textContent = '';
+    crmStatus.className = 'crm-status';
+    medicoSelecionado = null;
+    return;
+  }
 
   try {
-    const res = await fetch(`https://api-atestado.onrender.com/medico/crm/${crm}`);
-    if (res.ok) {
-      const medico = await res.json();
+    const res = await fetch(`https://api-atestado.onrender.com/medico/crm/${encodeURIComponent(crm)}`);
+
+    if (!res.ok) {
+      medicoSelecionado = null;
+      crmStatus.textContent = '✗ CRM não encontrado';
+      crmStatus.className = 'crm-status invalido';
+      document.getElementById('inputNomeMedico').value = '';
+      return;
+    }
+
+    const medico = await res.json();
+
+    if (medico.statusCrm === 'Ativo') {
       medicoSelecionado = medico;
       crmStatus.textContent = `✓ ${medico.nome}`;
       crmStatus.className = 'crm-status valido';
-
-      // Preenche nome do médico automaticamente
       document.getElementById('inputNomeMedico').value = medico.nome;
     } else {
-      crmStatus.textContent = '✗ Não encontrado';
+      medicoSelecionado = null;
+      crmStatus.textContent = `✗ CRM ${medico.statusCrm.toLowerCase()}`;
       crmStatus.className = 'crm-status invalido';
       document.getElementById('inputNomeMedico').value = '';
     }
+
   } catch {
-    crmStatus.textContent = '✗ Erro ao buscar';
+    medicoSelecionado = null;
+    crmStatus.textContent = '✗ Erro ao buscar CRM';
     crmStatus.className = 'crm-status invalido';
+    document.getElementById('inputNomeMedico').value = '';
   }
 });
 
@@ -386,6 +404,7 @@ form.addEventListener('submit', async e => {
   if (!colaboradorSelecionado) {
     shakeField(inputColab); return;
   }
+
   if (!tipoSelecionado) {
     const tipoGrid = document.getElementById('tipoGrid');
     tipoGrid.style.border = '1.5px solid var(--danger)';
@@ -396,7 +415,17 @@ form.addEventListener('submit', async e => {
     return;
   }
   if (!dataEmissao.value) { shakeField(dataEmissao); return; }
+
   if (!dataInicio.value) { shakeField(dataInicio); return; }
+
+  if (!medicoSelecionado) {
+    shakeField(inputCrm);
+
+    crmStatus.textContent = '✗ Informe um CRM válido e ativo';
+    crmStatus.className = 'crm-status invalido';
+
+    return;
+  }
 
   const hospitalId = document.getElementById('selectHospital').value;
   const isComparec = tipoSelecionado.tipo === 'Comparecimento';
