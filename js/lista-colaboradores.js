@@ -30,7 +30,7 @@ const tbodyColabs = document.getElementById('tbodyColabs');
 const pagInfo = document.getElementById('pagInfo');
 const pagBtns = document.getElementById('pagBtns');
 
-// ── Carregar da API ────────────────────────────────────────────────────
+// ── Funções ────────────────────────────────────────────────────
 async function carregarColaboradores() {
   try {
     const res = await fetch('https://api-atestado.onrender.com/colaborador/');
@@ -52,6 +52,28 @@ async function carregarColaboradores() {
   }
 }
 
+async function alterarStatusColaborador(matricula) {
+  try {
+    const res = await fetch(`https://api-atestado.onrender.com/colaborador/status/${matricula}`, {
+      method: 'PATCH'
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      console.error(result);
+      mostrarToast('Erro ao alterar status');
+      return;
+    }
+
+    mostrarToast('Status atualizado com sucesso!');
+    await carregarColaboradores();
+
+  } catch (err) {
+    console.error(err);
+    mostrarToast('Erro ao alterar status');
+  }
+}
 // ── Renderizar tabela ──────────────────────────────────────────────────
 function renderTabela() {
   const inicio = (paginaAtual - 1) * POR_PAGINA;
@@ -65,9 +87,15 @@ function renderTabela() {
   tbodyColabs.innerHTML = pagina.map(c => {
     const cor = corAvatar(c.nome);
     const ini = iniciais(c.nome);
-    const badge = c.status === 'ativo'
-      ? `<span class="badge badge-ativo">Ativo</span>`
-      : `<span class="badge badge-inativo">Inativo</span>`;
+    const badge = `
+                  <span 
+                    class="badge ${c.status === 'ativo' ? 'badge-ativo' : 'badge-inativo'}"
+                    style="cursor:pointer"
+                    onclick="event.stopPropagation(); abrirModalStatus('${c.matricula}', '${c.status}')"
+                  >
+                    ${c.status === 'ativo' ? 'Ativo' : 'Inativo'}
+                  </span>
+                `;
 
     return `<tr onclick="location.href='colaboradores.html?mat=${c.matricula}'">
       <td>
@@ -364,6 +392,69 @@ document.getElementById('salvarNovoColab').addEventListener('click', async () =>
     console.error('ERRO GERAL:', err);
     mostrarToast('Erro ao cadastrar colaborador');
   }
+});
+
+// ── Modal status ───────────────────────────────────────────────────────
+const modalStatus = document.getElementById('modalStatus');
+const fecharModalStatus = document.getElementById('fecharModalStatus');
+const cancelarStatus = document.getElementById('cancelarStatus');
+const confirmarStatus = document.getElementById('confirmarStatus');
+const textoModalStatus = document.getElementById('textoStatus');
+
+let matriculaSelecionada = null;
+
+const inputConfirmacao = document.getElementById('inputConfirmacao');
+
+inputConfirmacao.addEventListener('input', () => {
+  const valor = inputConfirmacao.value.trim().toUpperCase();
+
+  if (valor === 'CONFIRMAR') {
+    confirmarStatus.disabled = false;
+  } else {
+    confirmarStatus.disabled = true;
+  }
+});
+
+function abrirModalStatus(matricula, statusAtual) {
+  matriculaSelecionada = matricula;
+
+  inputConfirmacao.value = '';
+  confirmarStatus.disabled = true;
+
+  const novoStatus = statusAtual === 'ativo' ? 'inativo' : 'ativo';
+
+  textoModalStatus.textContent =
+    novoStatus === 'inativo'
+      ? 'Tem certeza que deseja INATIVAR este colaborador? Essa ação pode impactar relatórios.'
+      : 'Deseja REATIVAR este colaborador?';
+
+  modalStatus.classList.add('open');
+}
+
+fecharModalStatus.addEventListener('click', fecharModalStatusFn);
+cancelarStatus.addEventListener('click', fecharModalStatusFn);
+
+modalStatus.addEventListener('click', (e) => {
+  if (e.target === modalStatus) fecharModalStatusFn();
+});
+
+function fecharModalStatusFn() {
+  modalStatus.classList.remove('open');
+}
+
+confirmarStatus.addEventListener('click', async () => {
+  if (!matriculaSelecionada) return;
+
+  confirmarStatus.disabled = true;
+  confirmarStatus.textContent = 'Salvando...';
+
+  await alterarStatusColaborador(matriculaSelecionada);
+
+  inputConfirmacao.value = '';
+  confirmarStatus.disabled = true;
+  confirmarStatus.textContent = 'Confirmar';
+
+  fecharModalStatusFn();
 });
 
 // ── Toast ──────────────────────────────────────────────────────────────

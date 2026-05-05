@@ -3,6 +3,16 @@ document.addEventListener('DOMContentLoaded', () => {
   renderFicha(getMatricula());
 });
 
+document.getElementById('filtroAno').addEventListener('change', (e) => {
+  const anoSelecionado = e.target.value;
+
+  const filtrados = listaAtestados.filter(a => {
+    const ano = new Date(a.dataEmissao).getFullYear();
+    return String(ano) === String(anoSelecionado);
+  });
+
+  renderTabela(filtrados);
+});
 // ── Cores dos avatares ─────────────────────────────────────────────────
 const CORES = ['#e03040','#2e6da4','#8e44ad','#e67e22','#27ae60','#16a085','#d35400','#2980b9'];
 function corAvatar(nome) {
@@ -17,7 +27,7 @@ function iniciais(nome) {
 // ── Pegar matrícula da URL ─────────────────────────────────────────────
 function getMatricula() {
   const params = new URLSearchParams(window.location.search);
-  return params.get('mat') || '00412'; // default para demo
+  return params.get('mat'); // 
 }
 
 // ── Badge de status ─────────────────────────────────────────────────────
@@ -28,6 +38,8 @@ function badgeStatus(status) {
 }
 
 // ── Renderizar ficha ───────────────────────────────────────────────────
+let listaAtestados = [];
+
 async function renderFicha(mat) {
   try {
     // ── Colaborador ──
@@ -86,9 +98,10 @@ async function renderFicha(mat) {
     );
 
     const atestados = await resAtestados.json();
+    listaAtestados = atestados;
 
     renderTabela(atestados);
-
+    popularFiltroAno(atestados); 
   } catch (err) {
     console.error("Erro ao carregar ficha:", err);
   }
@@ -129,6 +142,19 @@ function renderTabela(atestados) {
       </tr>
     `;
   }).join('');
+}
+
+function popularFiltroAno(atestados) {
+  const select = document.getElementById('filtroAno');
+
+  // pega anos únicos
+  const anos = [...new Set(
+    atestados.map(a => new Date(a.dataEmissao).getFullYear())
+  )].sort((a, b) => b - a);
+
+  select.innerHTML = anos.map(ano =>
+    `<option value="${ano}">${ano}</option>`
+  ).join('');
 }
 
 // ── Modal de edição ─────────────────────────────────────────────────

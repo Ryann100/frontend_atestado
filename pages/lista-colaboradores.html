@@ -390,6 +390,31 @@
 
     </div>
   </div>
+
+  <div class="modal-overlay" id="modalStatus">
+    <div class="modal">
+
+      <div class="modal-header">
+        <div class="modal-titulo">Alterar status</div>
+        <button class="modal-fechar" id="fecharModalStatus">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>  
+
+      <p class="modal-desc" id="textoStatus"></p>
+      <input type="text" id="inputConfirmacao" class="filtro-input" placeholder="Digite CONFIRMAR para continuar"
+        style="margin-top:10px">
+
+      <div class="modal-actions">
+        <button class="btn-outline" id="cancelarStatus">Cancelar</button>
+        <button class="btn-primary" id="confirmarStatus" disabled>Confirmar</button>
+      </div>
+
+    </div>
+  </div>
   <script src="../js/lista-colaboradores.js"></script>
 </body>
 
