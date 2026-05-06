@@ -418,12 +418,11 @@ form.addEventListener('submit', async e => {
 
   if (!dataInicio.value) { shakeField(dataInicio); return; }
 
-  if (!medicoSelecionado) {
+  const tiposComCrm = ['Atestado Médico', 'Comparecimento Médico'];
+  if (tiposComCrm.includes(tipoSelecionado.tipo) && !medicoSelecionado) {
     shakeField(inputCrm);
-
     crmStatus.textContent = '✗ Informe um CRM válido e ativo';
     crmStatus.className = 'crm-status invalido';
-
     return;
   }
 

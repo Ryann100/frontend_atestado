@@ -1,8 +1,44 @@
 // ── CARREGAMENTO ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  carregarHospitais();
-  carregarMedicos();
+  carregarTudo();
 });
+
+let contagemPorHospital = {};
+let contagemPorMedico = {};
+
+document.addEventListener('DOMContentLoaded', () => {
+  carregarTudo();
+});
+
+async function carregarTudo() {
+  try {
+    const [resHosp, resMed, resAtest] = await Promise.all([
+      fetch('https://api-atestado.onrender.com/hospital/'),
+      fetch('https://api-atestado.onrender.com/medico/'),
+      fetch('https://api-atestado.onrender.com/atestado/')
+    ]);
+
+    todosHospitais = await resHosp.json();
+    todosMedicos = await resMed.json();
+    const atestados = await resAtest.json();
+
+    // Montar mapas de contagem
+    atestados.forEach(a => {
+      if (a.hospitalId) {
+        contagemPorHospital[a.hospitalId] = (contagemPorHospital[a.hospitalId] || 0) + 1;
+      }
+      if (a.medicoId) {
+        contagemPorMedico[a.medicoId] = (contagemPorMedico[a.medicoId] || 0) + 1;
+      }
+    });
+
+    renderHospitais(todosHospitais);
+    renderMedicos(todosMedicos);
+
+  } catch (error) {
+    console.error('Erro ao carregar dados:', error);
+  }
+}
 
 // ── CORES ──────────────────────────────────────────────────────────────
 const TIPO_CORES = {
@@ -227,7 +263,7 @@ async function renderHospitais(data) {
       <td>${tipoIcon(h.tipo)} ${h.nome}</td>
       <td>${h.tipo}</td>
       <td>${h.endereco}</td>
-      <td>—</td>
+      <td>${contagemPorHospital[h.id] || 0}</td>
       <td>
         <button class="btn-outline" onclick="editarHospital(${h.id})">
           Editar
@@ -411,14 +447,9 @@ function limparModalMedico() {
 }
 
 async function carregarMedicos() {
-  try {
-    const res = await fetch('https://api-atestado.onrender.com/medico/');
-    const data = await res.json();
-    todosMedicos = data;
-    renderMedicos(todosMedicos);
-  } catch (error) {
-    console.error('Erro ao carregar médicos:', error);
-  }
+  const res = await fetch('https://api-atestado.onrender.com/medico/');
+  todosMedicos = await res.json();
+  renderMedicos(todosMedicos);
 }
 
 let debounceTimer;
@@ -470,9 +501,9 @@ async function renderMedicos(medicos) {
     const vinculos = todosVinculos[i];
     const hospitaisNomes = vinculos.length > 0
       ? vinculos.map(v => {
-          const h = todosHospitais.find(h => h.id === v.hospitalId);
-          return h ? h.nome : '?';
-        }).join(', ')
+        const h = todosHospitais.find(h => h.id === v.hospitalId);
+        return h ? h.nome : '?';
+      }).join(', ')
       : '—';
 
     const tr = document.createElement('tr');
@@ -481,7 +512,7 @@ async function renderMedicos(medicos) {
       <td>${m.crm}</td>
       <td>${m.especialidade}</td>
       <td>${hospitaisNomes}</td>
-      <td>—</td>
+      <td>${contagemPorMedico[m.id] || 0}</td>
       <td><span class="badge ${statusClass}">${m.statusCrm}</span></td>
       <td>
         <button class="btn-outline" onclick="editarMedico(${m.id})">Editar</button>
