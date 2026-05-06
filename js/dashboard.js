@@ -1,117 +1,222 @@
-// ── Dados por competência (substituir pela API real) ───────────────────
-const DADOS = {
-  abr2025: {
-    total: 38, totalColabs: 31, dias: 94, nri: 4,
-    grafico: [20, 28, 24, 35, 31, 38],
-    grafLabels: ['Nov', 'Dez', 'Jan', 'Fev', 'Mar', 'Abr'],
-    tipos: [
-      { nome: 'Médico',         qtd: 22, cor: '#e03040' },
-      { nome: 'Comparecimento', qtd: 12, cor: '#4a9fd9' },
-      { nome: 'Maternidade',    qtd:  2, cor: '#8e44ad' },
-      { nome: 'Outros',         qtd:  2, cor: '#7f8c8d' },
-    ],
-    colabs: [
-      { nome: 'Ana Paula Santos',  sub: 'Logística',      val: 5 },
-      { nome: 'João Ribeiro',      sub: 'Logística',      val: 4, nri: true },
-      { nome: 'Camila Ferreira',   sub: 'Logística',      val: 3, nri: true },
-      { nome: 'Carlos Mota',       sub: 'Operacional',    val: 3 },
-      { nome: 'Marcos Lima',       sub: 'Operacional',    val: 2 },
-    ],
-    cids: [
-      { nome: 'J06', sub: 'Inf. vias aéreas', val: 12, nri: false },
-      { nome: 'Z00', sub: 'Consulta geral',   val: 10, nri: false },
-      { nome: 'M54', sub: 'Dorsalgia',        val:  8, nri: false },
-      { nome: 'F32', sub: 'Ep. depressivo',   val:  4, nri: true  },
-      { nome: 'F41', sub: 'Ansiedade',        val:  3, nri: true  },
-    ],
-    hospitais: [
-      { nome: 'UPA Central',          sub: 'UPA',     val: 18 },
-      { nome: 'Hosp. São Lucas',       sub: 'Hospital', val: 12 },
-      { nome: 'Clínica Bem Estar',     sub: 'Clínica', val:  6 },
-      { nome: 'Pronto-Soc. Norte',     sub: 'PS',      val:  2 },
-    ],
-    medicos: [
-      { nome: 'Dr. Roberto Lima',   sub: 'CRM/SP 12345', val: 14 },
-      { nome: 'Dra. Camila Souza',  sub: 'CRM/SP 54321', val:  9 },
-      { nome: 'Dr. Paulo Henrique', sub: 'CRM/SP 98765', val:  8, nri: true },
-      { nome: 'Dra. Ana Ferreira',  sub: 'CRM/SP 11111', val:  5 },
-    ],
-  },
-  mar2025: {
-    total: 31, totalColabs: 27, dias: 102, nri: 3,
-    grafico: [18, 22, 20, 28, 25, 31],
-    grafLabels: ['Out', 'Nov', 'Dez', 'Jan', 'Fev', 'Mar'],
-    tipos: [
-      { nome: 'Médico',         qtd: 18, cor: '#e03040' },
-      { nome: 'Comparecimento', qtd:  9, cor: '#4a9fd9' },
-      { nome: 'Maternidade',    qtd:  2, cor: '#8e44ad' },
-      { nome: 'Outros',         qtd:  2, cor: '#7f8c8d' },
-    ],
-    colabs: [
-      { nome: 'Ana Paula Santos', sub: 'Logística',   val: 4 },
-      { nome: 'Diego Martins',    sub: 'Operacional', val: 3 },
-      { nome: 'Juliana Neves',    sub: 'Financeiro',  val: 3, nri: true },
-      { nome: 'Thiago Alves',     sub: 'Logística',   val: 2 },
-    ],
-    cids: [
-      { nome: 'J06', sub: 'Inf. vias aéreas', val: 10, nri: false },
-      { nome: 'Z00', sub: 'Consulta geral',   val:  8, nri: false },
-      { nome: 'F33', sub: 'Transt. depress.', val:  3, nri: true  },
-      { nome: 'M54', sub: 'Dorsalgia',        val:  6, nri: false },
-    ],
-    hospitais: [
-      { nome: 'UPA Central',      sub: 'UPA',      val: 14 },
-      { nome: 'Hosp. São Lucas',  sub: 'Hospital', val:  9 },
-      { nome: 'Clínica Bem Estar',sub: 'Clínica',  val:  5 },
-    ],
-    medicos: [
-      { nome: 'Dr. Roberto Lima',  sub: 'CRM/SP 12345', val: 11 },
-      { nome: 'Dra. Camila Souza', sub: 'CRM/SP 54321', val:  8 },
-      { nome: 'Dr. Paulo Henrique',sub: 'CRM/SP 98765', val:  6, nri: true },
-    ],
-  },
-};
+// ── Init ───────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  carregarDashboard();
+});
 
-// ── Competências label ─────────────────────────────────────────────────
-const COMP_LABELS = {
-  abr2025: 'Abr/2025 · 16/03 a 15/04',
-  mar2025: 'Mar/2025 · 16/02 a 15/03',
-  fev2025: 'Fev/2025 · 16/01 a 15/02',
-  jan2025: 'Jan/2025 · 16/12 a 15/01',
-};
+// ── Estado ─────────────────────────────────────────────────────────────
+let todosAtestados = [];
+let todosColaboradores = [];
+let todosHospitais = [];
+let todosMedicos = [];
+let todosTipos = [];
+let competenciaAtual = '';
 
-// ── Render cards ───────────────────────────────────────────────────────
-function renderCards(d) {
-  document.getElementById('cardTotal').textContent  = d.total;
-  document.getElementById('cardColabs').textContent = d.totalColabs;
-  document.getElementById('cardDias').textContent   = d.dias;
-  document.getElementById('cardNri').textContent    = d.nri;
+// ── Helpers ────────────────────────────────────────────────────────────
+function getCompetenciaAtual() {
+  const hoje = new Date();
+  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+  return `${hoje.getFullYear()}/${mes}`;
 }
 
-// ── Render gráfico de barras ───────────────────────────────────────────
-function renderGrafico(d) {
-  const max    = Math.max(...d.grafico);
-  const wrap   = document.getElementById('graficoBarras');
-  const labels = document.getElementById('graficoLabels');
+function labelCompetencia(comp) {
+  // comp = "2025/04"
+  const [ano, mes] = comp.split('/');
+  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+  const nomeMes = meses[Number(mes) - 1];
 
-  wrap.innerHTML = d.grafico.map((v, i) => {
-    const h    = Math.round((v / max) * 100);
-    const last = i === d.grafico.length - 1;
+  const inicio = new Date(Number(ano), Number(mes) - 1, 16);
+  const fim = new Date(Number(ano), Number(mes), 15);
+  const fmtIni = inicio.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  const fmtFim = fim.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+
+  return `${nomeMes}/${ano} · ${fmtIni} a ${fmtFim}`;
+}
+
+function ultimas6Competencias() {
+  const hoje = new Date();
+  const lista = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+    const mes = String(d.getMonth() + 1).padStart(2, '0');
+    lista.push(`${d.getFullYear()}/${mes}`);
+  }
+  return lista;
+}
+
+// ── Carregar tudo ──────────────────────────────────────────────────────
+async function carregarDashboard() {
+  try {
+    const [resAtest, resColabs, resHosp, resMed, resTipos] = await Promise.all([
+      fetch('https://api-atestado.onrender.com/atestado/'),
+      fetch('https://api-atestado.onrender.com/colaborador/'),
+      fetch('https://api-atestado.onrender.com/hospital/'),
+      fetch('https://api-atestado.onrender.com/medico/'),
+      fetch('https://api-atestado.onrender.com/tipo-atestado/')
+    ]);
+
+    todosAtestados = await resAtest.json();
+    todosColaboradores = await resColabs.json();
+    todosHospitais = await resHosp.json();
+    todosMedicos = await resMed.json();
+    todosTipos = await resTipos.json();
+
+    // Mapas para cruzamento
+    window.mapaColabs = {};
+    todosColaboradores.forEach(c => { window.mapaColabs[c.matricula] = c; });
+
+    window.mapaHospitais = {};
+    todosHospitais.forEach(h => { window.mapaHospitais[h.id] = h; });
+
+    window.mapaMedicos = {};
+    todosMedicos.forEach(m => { window.mapaMedicos[m.id] = m; });
+
+    window.mapaTipos = {};
+    todosTipos.forEach(t => { window.mapaTipos[t.id] = t; });
+
+    // Popular filtro de competência
+    competenciaAtual = getCompetenciaAtual();
+    popularFiltroCompetencia();
+    popularFiltroSetor();
+
+    renderDashboard('todos', '');
+
+  } catch (error) {
+    console.error('Erro ao carregar dashboard:', error);
+  }
+}
+
+// ── Popular filtros ────────────────────────────────────────────────────
+function popularFiltroCompetencia() {
+  const competencias = [...new Set(todosAtestados.map(a => a.competencia).filter(Boolean))].sort().reverse();
+  const select = document.getElementById('filtroCompetencia');
+  select.innerHTML = '';
+
+  const optTodos = document.createElement('option');
+  optTodos.value = 'todos';
+  optTodos.textContent = 'Todos os períodos';
+  select.appendChild(optTodos);
+
+  competencias.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    const [ano, mes] = c.split('/');
+    const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    opt.textContent = `${meses[Number(mes) - 1]}/${ano}`;
+    select.appendChild(opt);
+  });
+}
+
+function popularFiltroSetor() {
+  const setores = [...new Set(todosColaboradores.map(c => c.departamento).filter(Boolean))].sort();
+  const select = document.getElementById('filtroSetor');
+  select.innerHTML = '<option value="">Todos os setores</option>';
+  setores.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s;
+    opt.textContent = s;
+    select.appendChild(opt);
+  });
+}
+
+// ── Render dashboard ───────────────────────────────────────────────────
+function renderDashboard(competencia, setor) {
+  const svgCal = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="13" height="13"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
+
+  const badgeTexto = competencia === 'todos'
+    ? labelCompetencia(competenciaAtual)
+    : labelCompetencia(competencia);
+
+  document.getElementById('competenciaBadge').innerHTML = `${svgCal} ${badgeTexto}`;
+
+  let atestados = competencia === 'todos'
+    ? [...todosAtestados]
+    : todosAtestados.filter(a => a.competencia === competencia);
+
+  if (setor) {
+    atestados = atestados.filter(a => {
+      const colab = window.mapaColabs[a.matricula];
+      return colab?.departamento === setor;
+    });
+  }
+
+  renderCards(atestados);
+  renderGrafico(setor);
+  renderTipos(atestados);
+  renderRankingColabs(atestados);
+  renderRankingCids(atestados);
+  renderRankingHospitais(atestados);
+  renderRankingMedicos(atestados);
+}
+
+// ── Cards ──────────────────────────────────────────────────────────────
+function renderCards(atestados) {
+  const total = atestados.length;
+  const colabsSet = new Set(atestados.map(a => a.matricula));
+  const dias = atestados.reduce((s, a) => s + (a.quantidadeDias || 0), 0);
+  const nri = atestados.filter(a => a.cid && a.cid.startsWith('F')).length;
+
+  document.getElementById('cardTotal').textContent = total;
+  document.getElementById('cardColabs').textContent = colabsSet.size;
+  document.getElementById('cardDias').textContent = dias;
+  document.getElementById('cardNri').textContent = nri;
+}
+
+// ── Gráfico de barras (últimas 6 competências) ─────────────────────────
+function renderGrafico(setor) {
+  const competencias = ultimas6Competencias();
+  const valores = competencias.map(comp => {
+    let atests = todosAtestados.filter(a => a.competencia === comp);
+    if (setor) {
+      atests = atests.filter(a => window.mapaColabs[a.matricula]?.departamento === setor);
+    }
+    return atests.length;
+  });
+
+  const max = Math.max(...valores, 1);
+  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+  const labels = competencias.map(c => meses[Number(c.split('/')[1]) - 1]);
+
+  document.getElementById('graficoBarras').innerHTML = valores.map((v, i) => {
+    const h = Math.round((v / max) * 100);
+    const last = i === valores.length - 1;
     return `<div class="barra-col">
       <div class="barra-val">${v}</div>
-      <div class="barra ${last ? 'atual' : ''}" style="height:${h}%" title="${d.grafLabels[i]}: ${v}"></div>
+      <div class="barra ${last ? 'atual' : ''}" style="height:${Math.max(h, 2)}%" title="${labels[i]}: ${v}"></div>
     </div>`;
   }).join('');
 
-  labels.innerHTML = d.grafLabels.map(l =>
+  document.getElementById('graficoLabels').innerHTML = labels.map(l =>
     `<div class="grafico-label">${l}</div>`
   ).join('');
 }
 
-// ── Render tipos ───────────────────────────────────────────────────────
-function renderTipos(d) {
-  const total = d.tipos.reduce((s, t) => s + t.qtd, 0);
-  document.getElementById('tiposChart').innerHTML = d.tipos.map(t => {
+// ── Tipos de registro ──────────────────────────────────────────────────
+function renderTipos(atestados) {
+  const CORES_TIPO = {
+    'Atestado Médico': '#e03040',
+    'Comparecimento Médico': '#4a9fd9',
+    'Maternidade': '#8e44ad',
+    'Paternidade': '#2ecc71',
+    'Luto': '#7f8c8d',
+    'Casamento': '#e67e22',
+    'Doação de Sangue': '#e74c3c',
+    'Doença Ocupacional': '#c0392b',
+  };
+
+  // Contar por tipo
+  const contagem = {};
+  atestados.forEach(a => {
+    const tipo = window.mapaTipos[a.tipoId]?.tipo || 'Outros';
+    contagem[tipo] = (contagem[tipo] || 0) + 1;
+  });
+
+  const tipos = Object.entries(contagem)
+    .map(([nome, qtd]) => ({ nome, qtd, cor: CORES_TIPO[nome] || '#7f8c8d' }))
+    .sort((a, b) => b.qtd - a.qtd);
+
+  const total = tipos.reduce((s, t) => s + t.qtd, 0) || 1;
+
+  document.getElementById('tiposChart').innerHTML = tipos.map(t => {
     const pct = Math.round((t.qtd / total) * 100);
     return `<div class="tipo-row">
       <div class="tipo-info">
@@ -124,7 +229,7 @@ function renderTipos(d) {
     </div>`;
   }).join('');
 
-  document.getElementById('tiposLegend').innerHTML = d.tipos.map(t =>
+  document.getElementById('tiposLegend').innerHTML = tipos.map(t =>
     `<div class="legend-item">
       <div class="legend-dot" style="background:${t.cor}"></div>
       ${t.nome} — ${t.qtd}
@@ -132,21 +237,21 @@ function renderTipos(d) {
   ).join('');
 }
 
-// ── Render ranking genérico ────────────────────────────────────────────
-function renderRanking(containerId, items, opcoes = {}) {
+// ── Ranking genérico ───────────────────────────────────────────────────
+function renderRanking(containerId, items) {
   const max = items[0]?.val || 1;
+  if (items.length === 0) {
+    document.getElementById(containerId).innerHTML = '<div class="rank-vazio">Sem dados no período</div>';
+    return;
+  }
   document.getElementById(containerId).innerHTML = items.map((item, i) => {
     const posClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
-    const pct      = Math.round((item.val / max) * 100);
-    const nriHtml  = item.nri ? `<span class="rank-nri">⚠ NRI</span>` : '';
-    const subHtml  = item.sub ? `<div class="rank-sub">${item.sub}${item.nri ? ' · ' : ''}</div>` : '';
-
+    const pct = Math.round((item.val / max) * 100);
     return `<div class="ranking-item">
       <div class="rank-pos ${posClass}">${i + 1}</div>
       <div class="rank-info">
         <div class="rank-nome">${item.nome} ${item.nri ? '<span style="color:var(--danger);font-size:11px">⚠</span>' : ''}</div>
-        ${subHtml}
-        ${nriHtml && !item.sub ? nriHtml : ''}
+        ${item.sub ? `<div class="rank-sub">${item.sub}</div>` : ''}
       </div>
       <div class="rank-bar-wrap">
         <div class="rank-bar-bg">
@@ -158,37 +263,78 @@ function renderRanking(containerId, items, opcoes = {}) {
   }).join('');
 }
 
-// ── Render tudo ────────────────────────────────────────────────────────
-function renderDashboard(comp) {
-  const d = DADOS[comp] || DADOS['abr2025'];
-  document.getElementById('competenciaBadge').innerHTML =
-    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="13" height="13"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    ${COMP_LABELS[comp] || ''}`;
+// ── Rankings específicos ───────────────────────────────────────────────
+function renderRankingColabs(atestados) {
+  const contagem = {};
+  atestados.forEach(a => {
+    const colab = window.mapaColabs[a.matricula];
+    const nome = colab?.nome || a.matricula;
+    const setor = colab?.departamento || '—';
+    const temNri = a.cid && a.cid.startsWith('F');
+    if (!contagem[a.matricula]) contagem[a.matricula] = { nome, sub: setor, val: 0, nri: false };
+    contagem[a.matricula].val++;
+    if (temNri) contagem[a.matricula].nri = true;
+  });
 
-  renderCards(d);
-  renderGrafico(d);
-  renderTipos(d);
-  renderRanking('rankingColabs',    d.colabs);
-  renderRanking('rankingCids',      d.cids);
-  renderRanking('rankingHospitais', d.hospitais);
-  renderRanking('rankingMedicos',   d.medicos);
+  const items = Object.values(contagem).sort((a, b) => b.val - a.val).slice(0, 5);
+  renderRanking('rankingColabs', items);
+}
+
+function renderRankingCids(atestados) {
+  const contagem = {};
+  atestados.filter(a => a.cid).forEach(a => {
+    if (!contagem[a.cid]) contagem[a.cid] = { nome: a.cid, val: 0, nri: a.cid.startsWith('F') };
+    contagem[a.cid].val++;
+  });
+
+  const items = Object.values(contagem).sort((a, b) => b.val - a.val).slice(0, 5);
+  renderRanking('rankingCids', items);
+}
+
+function renderRankingHospitais(atestados) {
+  const contagem = {};
+  atestados.filter(a => a.hospitalId).forEach(a => {
+    const hosp = window.mapaHospitais[a.hospitalId];
+    const nome = hosp?.nome || `Hospital #${a.hospitalId}`;
+    const sub = hosp?.tipo || '—';
+    if (!contagem[a.hospitalId]) contagem[a.hospitalId] = { nome, sub, val: 0 };
+    contagem[a.hospitalId].val++;
+  });
+
+  const items = Object.values(contagem).sort((a, b) => b.val - a.val).slice(0, 5);
+  renderRanking('rankingHospitais', items);
+}
+
+function renderRankingMedicos(atestados) {
+  const contagem = {};
+  atestados.filter(a => a.medicoId).forEach(a => {
+    const med = window.mapaMedicos[a.medicoId];
+    const nome = med?.nome || `Médico #${a.medicoId}`;
+    const sub = med?.crm || '—';
+    const temNri = a.cid && a.cid.startsWith('F');
+    if (!contagem[a.medicoId]) contagem[a.medicoId] = { nome, sub, val: 0, nri: false };
+    contagem[a.medicoId].val++;
+    if (temNri) contagem[a.medicoId].nri = true;
+  });
+
+  const items = Object.values(contagem).sort((a, b) => b.val - a.val).slice(0, 5);
+  renderRanking('rankingMedicos', items);
 }
 
 // ── Filtros ────────────────────────────────────────────────────────────
-document.getElementById('filtroCompetencia').addEventListener('change', function() {
-  renderDashboard(this.value);
+document.getElementById('filtroCompetencia').addEventListener('change', function () {
+  const setor = document.getElementById('filtroSetor').value;
+  renderDashboard(this.value, setor);
 });
-document.getElementById('filtroSetor').addEventListener('change', function() {
-  // TODO: filtrar dados por setor via API real
-  renderDashboard(document.getElementById('filtroCompetencia').value);
+
+document.getElementById('filtroSetor').addEventListener('change', function () {
+  const comp = document.getElementById('filtroCompetencia').value;
+  renderDashboard(comp, this.value);
 });
 
 // ── Sidebar mobile ─────────────────────────────────────────────────────
-const sidebar        = document.getElementById('sidebar');
-const menuToggle     = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const menuToggle = document.getElementById('menuToggle');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
 menuToggle.addEventListener('click', () => { sidebar.classList.toggle('open'); sidebarOverlay.classList.toggle('open'); });
 sidebarOverlay.addEventListener('click', () => { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('open'); });
-
-// ── Init ───────────────────────────────────────────────────────────────
-renderDashboard('abr2025');
