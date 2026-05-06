@@ -46,6 +46,10 @@ async function carregarColaboradores() {
     }));
 
     dadosFiltrados = [...COLABORADORES];
+
+    popularFiltroSetor();
+    popularFiltroContrato()
+
     render();
   } catch (error) {
     console.error('Erro ao carregar colaboradores:', error);
@@ -224,6 +228,30 @@ btnLimpar.addEventListener('click', () => {
   paginaAtual = 1;
   render();
 });
+
+function popularFiltroSetor() {
+  const setores = [...new Set(COLABORADORES.map(c => c.setor).filter(Boolean))].sort();
+  const select = document.getElementById('filtroSetor');
+  select.innerHTML = '<option value="">Todos os setores</option>';
+  setores.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s;
+    opt.textContent = s;
+    select.appendChild(opt);
+  });
+}
+
+function popularFiltroContrato() {
+  const contratos = [...new Set(COLABORADORES.map(c => c.contrato).filter(Boolean))].sort();
+  const select = document.getElementById('filtroContrato');
+  select.innerHTML = '<option value="">Todos</option>';
+  contratos.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    select.appendChild(opt);
+  });
+}
 
 // ── MODAL IMPORTAR PLANILHA ────────────────────────────────────────────
 
