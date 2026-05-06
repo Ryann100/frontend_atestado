@@ -434,13 +434,13 @@ form.addEventListener('submit', async e => {
     dataEmissao: new Date(dataEmissao.value + 'T12:00:00.000Z'),
     dataInicio: new Date(dataInicio.value + 'T12:00:00.000Z'),
     dataFim: dataFim.value ? new Date(dataFim.value + 'T12:00:00.000Z') : undefined,
-    horaInicio: isComparec ? (inputHoras.value || '00:00') : '00:00',
+    horaInicio: isComparec ? '00:00' : (inputHoras.value || '00:00'),
     horaFim: undefined,
     cid: inputCid.value.trim().toUpperCase() || undefined,
     tipoId: tipoSelecionado.id,
     hospitalId: hospitalId ? Number(hospitalId) : undefined,
     medicoId: medicoSelecionado?.id || undefined,
-    observacoes: document.getElementById('observacoes').value.trim() || undefined,
+    observacoes: document.getElementById('observacoes').value.trim(),
   };
 
   btnSalvar.disabled = true;

@@ -6,10 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
 let contagemPorHospital = {};
 let contagemPorMedico = {};
 
-document.addEventListener('DOMContentLoaded', () => {
-  carregarTudo();
-});
-
 async function carregarTudo() {
   try {
     const [resHosp, resMed, resAtest] = await Promise.all([
