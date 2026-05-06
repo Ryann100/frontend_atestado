@@ -1,5 +1,6 @@
 // ── Init ───────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  atualizarCompetenciaTopbar();
   carregarAtestados();
 });
 
@@ -93,6 +94,26 @@ async function carregarAtestados() {
     console.error('Erro ao carregar atestados:', error);
     tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Erro ao carregar dados.</td></tr>';
   }
+}
+
+function atualizarCompetenciaTopbar() {
+  const subEl = document.querySelector('.topbar-sub');
+  if (!subEl) return;
+
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = hoje.getMonth(); // 0-based
+
+  const inicio = new Date(ano, mes - 1, 16);
+  const fim    = new Date(ano, mes, 15);
+
+  const nomeMes = hoje.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+  const fmtInicio = inicio.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  const fmtFim    = fim.toLocaleDateString('pt-BR',    { day: '2-digit', month: '2-digit' });
+
+  const label = nomeMes.replace(/^\w/, c => c.toUpperCase()).replace('.', '');
+
+  subEl.textContent = `Competência: ${label} · ${fmtInicio} a ${fmtFim}`;
 }
 
 // ── Popular filtro de competência dinamicamente ────────────────────────
@@ -235,7 +256,7 @@ function renderPaginacao() {
 // ── Resumo ─────────────────────────────────────────────────────────────
 function atualizarResumo() {
   const total     = dadosFiltrados.length;
-  const comparec  = dadosFiltrados.filter(a => a.tipo === 'Comparecimento').length;
+  const comparec  = dadosFiltrados.filter(a => a.tipo === 'Comparecimento Médico').length;
   const diasTotal = dadosFiltrados.filter(a => a.dias).reduce((s, a) => s + a.dias, 0);
   const nri       = dadosFiltrados.filter(a => a.cid && a.cid.startsWith('F')).length;
 
