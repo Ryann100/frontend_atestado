@@ -51,7 +51,7 @@ async function carregarColaboradores() {
       status: c.status === true ? 'ativo' : 'inativo',
       contrato: c.tipoContrato,
       setor: c.departamento,
-      admissao: new Date(c.dataAdmissao).toLocaleDateString('pt-BR')
+      admissao: formatarData(c.dataAdmissao)
     }));
 
     dadosFiltrados = [...COLABORADORES];
@@ -86,6 +86,13 @@ async function alterarStatusColaborador(matricula) {
     console.error(err);
     mostrarToast('Erro ao alterar status');
   }
+}
+
+function formatarData(dataStr) {
+  if (!dataStr) return '—';
+  const data = new Date(dataStr);
+  return new Date(data.getTime() + data.getTimezoneOffset() * 60000)
+    .toLocaleDateString('pt-BR');
 }
 // ── Renderizar tabela ──────────────────────────────────────────────────
 function renderTabela() {
