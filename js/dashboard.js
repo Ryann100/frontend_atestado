@@ -1,6 +1,7 @@
 // ── Init ───────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   carregarDashboard();
+  carregarUsuario();
 });
 
 // ── Estado ─────────────────────────────────────────────────────────────
@@ -12,6 +13,15 @@ let todosTipos = [];
 let competenciaAtual = '';
 
 // ── Helpers ────────────────────────────────────────────────────────────
+function carregarUsuario() {
+  const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+  const nome = usuario.nome || 'Usuário';
+  const iniciais = nome.split(' ').slice(0, 2).map(p => p[0].toUpperCase()).join('');
+
+  const avatarEl = document.querySelector('.topbar-avatar');
+  if (avatarEl) avatarEl.textContent = iniciais;
+}
+
 function getCompetenciaAtual() {
   const hoje = new Date();
   const mes = String(hoje.getMonth() + 1).padStart(2, '0');

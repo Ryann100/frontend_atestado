@@ -13,6 +13,13 @@ document.getElementById('filtroAno').addEventListener('change', (e) => {
 
   renderTabela(filtrados);
 });
+
+function formatarData(dataStr) {
+  if (!dataStr) return '—';
+  const data = new Date(dataStr);
+  return new Date(data.getTime() + data.getTimezoneOffset() * 60000)
+    .toLocaleDateString('pt-BR');
+}
 // ── Cores dos avatares ─────────────────────────────────────────────────
 const CORES = ['#e03040','#2e6da4','#8e44ad','#e67e22','#27ae60','#16a085','#d35400','#2980b9'];
 function corAvatar(nome) {
@@ -61,7 +68,7 @@ async function renderFicha(mat) {
 
     const setor = c.departamento;
     const contrato = c.tipoContrato;
-    const admissao = new Date(c.dataAdmissao).toLocaleDateString('pt-BR');
+    const admissao = formatarData(c.dataAdmissao);
     const status = c.status ? 'ativo' : 'inativo';
 
     document.getElementById('breadcrumbNome').textContent = c.nome;

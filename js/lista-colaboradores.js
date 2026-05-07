@@ -1,8 +1,17 @@
 // ── Init ───────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   carregarColaboradores();
+  carregarUsuario();
 });
 
+function carregarUsuario() {
+  const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+  const nome = usuario.nome || 'Usuário';
+  const iniciais = nome.split(' ').slice(0, 2).map(p => p[0].toUpperCase()).join('');
+
+  const avatarEl = document.querySelector('.topbar-avatar');
+  if (avatarEl) avatarEl.textContent = iniciais;
+}
 // ── Estado ─────────────────────────────────────────────────────────────
 let COLABORADORES = [];
 let dadosFiltrados = [];
@@ -42,7 +51,7 @@ async function carregarColaboradores() {
       status: c.status === true ? 'ativo' : 'inativo',
       contrato: c.tipoContrato,
       setor: c.departamento,
-      admissao: new Date(c.dataAdmissao).toLocaleDateString('pt-BR')
+      admissao: formatarData(c.dataAdmissao)
     }));
 
     dadosFiltrados = [...COLABORADORES];
@@ -77,6 +86,13 @@ async function alterarStatusColaborador(matricula) {
     console.error(err);
     mostrarToast('Erro ao alterar status');
   }
+}
+
+function formatarData(dataStr) {
+  if (!dataStr) return '—';
+  const data = new Date(dataStr);
+  return new Date(data.getTime() + data.getTimezoneOffset() * 60000)
+    .toLocaleDateString('pt-BR');
 }
 // ── Renderizar tabela ──────────────────────────────────────────────────
 function renderTabela() {
