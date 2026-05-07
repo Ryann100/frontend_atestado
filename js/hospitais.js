@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let contagemPorHospital = {};
 let contagemPorMedico = {};
+let todosVinculos = [];
 
 function carregarUsuario() {
   const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
@@ -18,15 +19,17 @@ function carregarUsuario() {
 
 async function carregarTudo() {
   try {
-    const [resHosp, resMed, resAtest] = await Promise.all([
+    const [resHosp, resMed, resAtest, resVinc] = await Promise.all([
       fetch('https://api-atestado.onrender.com/hospital/'),
       fetch('https://api-atestado.onrender.com/medico/'),
-      fetch('https://api-atestado.onrender.com/atestado/')
+      fetch('https://api-atestado.onrender.com/atestado/'),
+      fetch('https://api-atestado.onrender.com/medico-hospital/vinculos')
     ]);
 
     todosHospitais = await resHosp.json();
     todosMedicos = await resMed.json();
     const atestados = await resAtest.json();
+    todosVinculos = await resVinc.json();
 
     // Montar mapas de contagem
     atestados.forEach(a => {
@@ -238,27 +241,6 @@ function mostrarToast(mensagem) {
   }, 3000);
 }
 
-async function buscarHospitais() {
-  const nome = inputBusca.value.toLowerCase().trim();
-  const tipo = filtroTipo.value;
-
-  try {
-    const res = await fetch('https://api-atestado.onrender.com/hospital/');
-    const data = await res.json();
-    const filtrados = data.filter(h => {
-      const matchNome = h.nome.toLowerCase().includes(nome);
-      const matchTipo = tipo ? h.tipo === tipo : true;
-
-      return matchNome && matchTipo;
-    });
-
-    renderHospitais(filtrados);
-
-  } catch (error) {
-    console.error('Erro na busca:', error);
-  }
-}
-
 async function renderHospitais(data) {
   const tbody = document.getElementById('tbodyHospitais');
   tbody.innerHTML = '';
@@ -403,32 +385,26 @@ document.getElementById('salvarMedico').addEventListener('click', async () => {
 
 // ── FUNÇÕES DO HOSPITAL ────────────────────────────────────────────────
 
-async function carregarHospitaisNoModal() {
+function carregarHospitaisNoModal() {
   const menu = document.getElementById('hospDropdownMenu');
   menu.innerHTML = '';
 
-  try {
-    const res = await fetch('https://api-atestado.onrender.com/hospital/');
-    const hospitais = await res.json();
+  todosHospitais.forEach(h => {
+    const label = document.createElement('label');
+    label.classList.add('hosp-dropdown-item');
 
-    hospitais.forEach(h => {
-      const label = document.createElement('label');
-      label.classList.add('hosp-dropdown-item');
-      label.innerHTML = `
-        <input type="checkbox" value="${h.id}" name="hospitalVinculo">
-        ${tipoIcon(h.tipo)}
-        <span>${h.nome}</span>
-      `;
-      menu.appendChild(label);
-    });
+    label.innerHTML = `
+      <input type="checkbox" value="${h.id}" name="hospitalVinculo">
+      ${tipoIcon(h.tipo)}
+      <span>${h.nome}</span>
+    `;
 
-    menu.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-      cb.addEventListener('change', atualizarLabelDropdown);
-    });
+    menu.appendChild(label);
+  });
 
-  } catch (error) {
-    console.error('Erro ao carregar hospitais no modal:', error);
-  }
+  menu.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', atualizarLabelDropdown);
+  });
 }
 
 function atualizarLabelDropdown() {
@@ -459,16 +435,21 @@ async function carregarMedicos() {
 }
 
 let debounceTimer;
+
 function filtrarMedicos() {
   clearTimeout(debounceTimer);
+
   debounceTimer = setTimeout(() => {
     const busca = inputBuscaMedico.value.toLowerCase().trim();
     const status = filtroStatusCrm.value;
 
     const filtrados = todosMedicos.filter(m => {
-      const matchNome = m.nome.toLowerCase().includes(busca) ||
+      const matchNome =
+        m.nome.toLowerCase().includes(busca) ||
         m.crm.toLowerCase().includes(busca);
+
       const matchStatus = status ? m.statusCrm === status : true;
+
       return matchNome && matchStatus;
     });
 
@@ -485,34 +466,29 @@ async function renderMedicos(medicos) {
   tbody.innerHTML = '';
 
   if (!medicos || medicos.length === 0) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Nenhum médico cadastrado.</td></tr>';
+    tbody.innerHTML =
+      '<tr class="empty-row"><td colspan="7">Nenhum médico cadastrado.</td></tr>';
     return;
   }
 
-  // Busca todos os vínculos de uma vez em paralelo
-  const vinculosPromises = medicos.map(m =>
-    fetch(`https://api-atestado.onrender.com/medico-hospital/medico/${m.id}/hospitais`)
-      .then(r => r.ok ? r.json() : [])
-      .catch(() => [])
-  );
-
-  const todosVinculos = await Promise.all(vinculosPromises);
-
-  if (versaoAtual !== renderVersao) return;
-
   medicos.forEach((m, i) => {
-    const statusClass = m.statusCrm === 'Ativo' ? 'badge-ativo' : 'badge-inativo';
+    const statusClass =
+      m.statusCrm === 'Ativo'
+        ? 'badge-ativo'
+        : 'badge-inativo';
 
-    // Usa todosHospitais que já está em memória, sem novo fetch
-    const vinculos = todosVinculos[i];
-    const hospitaisNomes = vinculos.length > 0
-      ? vinculos.map(v => {
-        const h = todosHospitais.find(h => h.id === v.hospitalId);
-        return h ? h.nome : '?';
-      }).join(', ')
-      : '—';
+    const vinculos = todosVinculos.filter(v => v.medicoId === m.id);
+
+    const hospitaisNomes =
+      vinculos.length > 0
+        ? vinculos.map(v => {
+          const h = todosHospitais.find(h => h.id === v.hospitalId);
+          return h ? h.nome : '?';
+        }).join(', ')
+        : '—';
 
     const tr = document.createElement('tr');
+
     tr.innerHTML = `
       <td><div class="med-avatar">${iniciais(m.nome)}</div> ${m.nome}</td>
       <td>${m.crm}</td>
@@ -524,6 +500,7 @@ async function renderMedicos(medicos) {
         <button class="btn-outline" onclick="editarMedico(${m.id})">Editar</button>
       </td>
     `;
+
     tbody.appendChild(tr);
   });
 }
