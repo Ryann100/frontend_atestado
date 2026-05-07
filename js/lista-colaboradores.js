@@ -1,8 +1,17 @@
 // ── Init ───────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   carregarColaboradores();
+  carregarUsuario();
 });
 
+function carregarUsuario() {
+  const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+  const nome = usuario.nome || 'Usuário';
+  const iniciais = nome.split(' ').slice(0, 2).map(p => p[0].toUpperCase()).join('');
+
+  const avatarEl = document.querySelector('.topbar-avatar');
+  if (avatarEl) avatarEl.textContent = iniciais;
+}
 // ── Estado ─────────────────────────────────────────────────────────────
 let COLABORADORES = [];
 let dadosFiltrados = [];
