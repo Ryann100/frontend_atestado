@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   carregarUsuario();
   carregarHome();
+  carregarUltimoAcidente();
 });
 
 // ── Usuário logado ─────────────────────────────────────────────────────
@@ -160,6 +161,102 @@ async function carregarHome() {
   } catch (error) {
     console.error('Erro ao carregar home:', error);
     tbody.innerHTML = '<tr><td colspan="7">Erro ao carregar dados.</td></tr>';
+  }
+}
+
+// ── Modal registrar acidente ─────────────────────────────────────────
+const modalAcidente = document.getElementById('modalAcidente');
+const btnRegistrar = document.getElementById('btnRegistrarAcidente');
+const modalClose = document.getElementById('modalClose');
+const modalCancelar = document.getElementById('modalCancelar');
+const modalDataHoje = document.getElementById('modalDataHoje');
+
+function abrirModal() {
+  const hoje = new Date().toLocaleDateString('pt-BR', {
+    day: '2-digit', month: '2-digit', year: 'numeric'
+  });
+  modalDataHoje.textContent = hoje;
+  modalAcidente.classList.add('open');
+}
+
+function fecharModal() {
+  modalAcidente.classList.remove('open');
+}
+
+btnRegistrar.addEventListener('click', abrirModal);
+modalClose.addEventListener('click', fecharModal);
+modalCancelar.addEventListener('click', fecharModal);
+modalAcidente.addEventListener('click', (e) => {
+  if (e.target === modalAcidente) fecharModal();
+});
+
+const modalConfirmar = document.getElementById('modalConfirmar');
+const modalObservacoes = document.getElementById('modalObservacoes');
+
+modalConfirmar.addEventListener('click', registrarAcidente);
+
+async function registrarAcidente() {
+
+  try {
+
+    const observacoes = modalObservacoes.value.trim();
+
+    const response = await fetch('https://api-atestado.onrender.com/acidente', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        observacoes
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao registrar acidente');
+    }
+
+    fecharModal();
+
+    modalObservacoes.value = '';
+
+    await carregarUltimoAcidente();
+
+    alert('Acidente registrado com sucesso!');
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert('Erro ao registrar acidente');
+  }
+}
+
+async function carregarUltimoAcidente() {
+
+  try {
+
+    const response = await fetch('https://api-atestado.onrender.com/acidente');
+
+    if (!response.ok) {
+      throw new Error('Erro ao buscar acidente');
+    }
+
+    const acidente = await response.json();
+
+    const dataAcidente = new Date(acidente.dataAcidente);
+    const hoje = new Date();
+
+    const diffMs = hoje - dataAcidente;
+
+    const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    document.getElementById('diasSemAcidente').textContent = dias;
+
+  } catch (error) {
+
+    console.error(error);
+
+    document.getElementById('diasSemAcidente').textContent = '—';
   }
 }
 
