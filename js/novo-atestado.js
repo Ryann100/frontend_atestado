@@ -412,7 +412,8 @@ form.addEventListener('submit', async e => {
   e.preventDefault();
 
   if (!colaboradorSelecionado) {
-    shakeField(inputColab); return;
+    shakeField(inputColab);
+    return;
   }
 
   if (!tipoSelecionado) {
@@ -421,12 +422,23 @@ form.addEventListener('submit', async e => {
     tipoGrid.style.borderRadius = '10px';
     tipoGrid.style.padding = '10px';
     tipoGrid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(() => { tipoGrid.style.border = ''; tipoGrid.style.padding = ''; }, 2000);
+
+    setTimeout(() => {
+      tipoGrid.style.border = '';
+      tipoGrid.style.padding = '';
+    }, 2000);
     return;
   }
-  if (!dataEmissao.value) { shakeField(dataEmissao); return; }
 
-  if (!dataInicio.value) { shakeField(dataInicio); return; }
+  if (!dataEmissao.value) {
+    shakeField(dataEmissao);
+    return;
+  }
+
+  if (!dataInicio.value) {
+    shakeField(dataInicio);
+    return;
+  }
 
   const tiposComCrm = ['Atestado Médico', 'Comparecimento Médico'];
   if (tiposComCrm.includes(tipoSelecionado.tipo) && !medicoSelecionado) {
@@ -439,81 +451,119 @@ form.addEventListener('submit', async e => {
   const hospitalId = document.getElementById('selectHospital').value;
   const isComparec = tipoSelecionado.tipo === 'Comparecimento';
 
-  const payload = {
-    matricula: colaboradorSelecionado.matricula,
-    dataEmissao: new Date(dataEmissao.value + 'T12:00:00.000Z'),
-    dataInicio: new Date(dataInicio.value + 'T12:00:00.000Z'),
-    dataFim: dataFim.value ? new Date(dataFim.value + 'T12:00:00.000Z') : undefined,
-    horaInicio: isComparec ? '00:00' : (inputHoras.value || '00:00'),
-    horaFim: undefined,
-    cid: inputCid.value.trim().toUpperCase() || undefined,
-    tipoId: tipoSelecionado.id,
-    hospitalId: hospitalId ? Number(hospitalId) : undefined,
-    medicoId: medicoSelecionado?.id || undefined,
-    observacoes: document.getElementById('observacoes').value.trim(),
-  };
+  // =========================================================
+  // IMPORTANTE: usar FormData para enviar arquivo + campos
+  // =========================================================
+  const formData = new FormData();
+
+  formData.append('matricula', colaboradorSelecionado.matricula);
+  formData.append('dataEmissao', dataEmissao.value);
+  formData.append('dataInicio', dataInicio.value);
+
+  if (dataFim.value) {
+    formData.append('dataFim', dataFim.value);
+  }
+
+  formData.append(
+    'horaInicio',
+    isComparec ? '00:00' : (inputHoras.value || '00:00')
+  );
+
+  if (inputCid.value.trim()) {
+    formData.append('cid', inputCid.value.trim().toUpperCase());
+  }
+
+  formData.append('tipoId', tipoSelecionado.id);
+
+  if (hospitalId) {
+    formData.append('hospitalId', hospitalId);
+  }
+
+  if (medicoSelecionado?.id) {
+    formData.append('medicoId', medicoSelecionado.id);
+  }
+
+  const observacoes = document
+    .getElementById('observacoes')
+    .value
+    .trim();
+
+  if (observacoes) {
+    formData.append('observacoes', observacoes);
+  }
+
+  // Anexa o arquivo, se existir
+  if (inputArquivo.files.length > 0) {
+    formData.append('arquivo', inputArquivo.files[0]);
+  }
 
   btnSalvar.disabled = true;
   btnSalvar.innerHTML = `
-    <svg class="spinner-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+    <svg class="spinner-svg" width="16" height="16" viewBox="0 0 24 24"
+      fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
       <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
     </svg>
-    Salvando...`;
+    Salvando...
+  `;
 
   try {
-    console.log('payload:', JSON.stringify(payload));
-
     const res = await fetch('https://api-atestado.onrender.com/atestado/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: formData
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-      alert('Erro: ' + (data.error || res.statusText));
-      btnSalvar.disabled = false;
-      btnSalvar.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16">
-          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-          <polyline points="17 21 17 13 7 13 7 21"/>
-          <polyline points="7 3 7 8 15 8"/>
-        </svg>
-        Salvar atestado`;
-      return;
+      throw new Error(data.error || res.statusText);
     }
 
     mostrarToast('Atestado cadastrado com sucesso!');
-    setTimeout(() => location.href = 'atestados.html', 1500);
+
+    setTimeout(() => {
+      location.href = 'atestados.html';
+    }, 2500);
 
   } catch (error) {
     alert('Erro: ' + error.message);
+
     btnSalvar.disabled = false;
+    btnSalvar.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" width="16" height="16">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+      Salvar atestado
+    `;
   }
 });
-
-function shakeField(el) {
-  el.classList.add('error');
-  el.style.animation = 'shake 0.4s ease';
-  el.focus();
-  setTimeout(() => { el.style.animation = ''; el.classList.remove('error'); }, 500);
-}
 
 function mostrarToast(msg) {
   const toast = document.createElement('div');
   toast.className = 'toast';
   toast.innerHTML = `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round">
       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
       <polyline points="22 4 12 14.01 9 11.01"/>
     </svg>
-    ${msg}`;
-  document.body.appendChild(toast);
-  requestAnimationFrame(() => toast.classList.add('show'));
-  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 2500);
-}
+    ${msg}
+  `;
 
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+  });
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+  }, 2500);
+}
 // ── Sidebar mobile ─────────────────────────────────────────────────────
 const sidebar = document.getElementById('sidebar');
 const menuToggle = document.getElementById('menuToggle');
