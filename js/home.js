@@ -191,7 +191,7 @@ modalAcidente.addEventListener('click', (e) => {
 });
 
 const modalConfirmar = document.getElementById('modalConfirmar');
-const modalObservacoes = document.getElementById('modalObservacoes');
+const modalDescricao = document.getElementById('modalObservacoes');
 
 modalConfirmar.addEventListener('click', registrarAcidente);
 
@@ -199,7 +199,7 @@ async function registrarAcidente() {
 
   try {
 
-    const observacoes = modalObservacoes.value.trim();
+    const descricao = modalDescricao.value.trim();
 
     const response = await fetch('https://api-atestado.onrender.com/acidente', {
       method: 'POST',
@@ -207,7 +207,7 @@ async function registrarAcidente() {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        observacoes
+        descricao
       })
     });
 
@@ -217,7 +217,7 @@ async function registrarAcidente() {
 
     fecharModal();
 
-    modalObservacoes.value = '';
+    modalDescricao.value = '';
 
     await carregarUltimoAcidente();
 
@@ -235,7 +235,7 @@ async function carregarUltimoAcidente() {
 
   try {
 
-    const response = await fetch('https://api-atestado.onrender.com/acidente');
+    const response = await fetch('https://api-atestado.onrender.com/acidente/ultimo');
 
     if (!response.ok) {
       throw new Error('Erro ao buscar acidente');
