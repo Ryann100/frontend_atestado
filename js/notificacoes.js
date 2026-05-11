@@ -80,36 +80,36 @@ let filtroAtivo = 'todas';
 // ── Ícones SVG por tipo ────────────────────────────────────────────────
 const ICONES = {
   alerta: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
-  aviso:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
-  relogio:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
-  check:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
-  doc:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>`,
+  aviso: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  relogio: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+  doc: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>`,
   pessoa: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`,
 };
 
-const PRIORIDADE_LABEL = { urgente:'Urgente', atencao:'Atenção', info:'Info', sucesso:'Sucesso' };
-const ICONE_CLASSE     = { urgente:'urgente', atencao:'atencao', info:'info', sucesso:'sucesso' };
+const PRIORIDADE_LABEL = { urgente: 'Urgente', atencao: 'Atenção', info: 'Info', sucesso: 'Sucesso' };
+const ICONE_CLASSE = { urgente: 'urgente', atencao: 'atencao', info: 'info', sucesso: 'sucesso' };
 
 // ── Filtrar ────────────────────────────────────────────────────────────
 function filtrar() {
   switch (filtroAtivo) {
     case 'nao-lidas': return NOTIFICACOES.filter(n => !n.lida);
-    case 'urgente':   return NOTIFICACOES.filter(n => n.prioridade === 'urgente');
-    case 'atencao':   return NOTIFICACOES.filter(n => n.prioridade === 'atencao');
-    case 'info':      return NOTIFICACOES.filter(n => n.prioridade === 'info');
-    default:          return NOTIFICACOES;
+    case 'urgente': return NOTIFICACOES.filter(n => n.prioridade === 'urgente');
+    case 'atencao': return NOTIFICACOES.filter(n => n.prioridade === 'atencao');
+    case 'info': return NOTIFICACOES.filter(n => n.prioridade === 'info');
+    default: return NOTIFICACOES;
   }
 }
 
 // ── Render ─────────────────────────────────────────────────────────────
 function render() {
-  const lista   = filtrar();
+  const lista = filtrar();
   const naoLidas = NOTIFICACOES.filter(n => !n.lida).length;
-  const sub      = naoLidas > 0 ? `${naoLidas} não lida(s)` : 'Tudo em dia ✓';
+  const sub = naoLidas > 0 ? `${naoLidas} não lida(s)` : 'Tudo em dia ✓';
   document.getElementById('topbarSub').textContent = sub;
 
   const container = document.getElementById('notifLista');
-  const empty     = document.getElementById('notifEmpty');
+  const empty = document.getElementById('notifEmpty');
 
   if (lista.length === 0) {
     container.innerHTML = '';
@@ -119,9 +119,9 @@ function render() {
   empty.style.display = 'none';
 
   container.innerHTML = lista.map(n => {
-    const cls       = ICONE_CLASSE[n.prioridade] || 'info';
-    const dotColor  = { urgente:'var(--danger)', atencao:'#e67e22', info:'#4a9fd9', sucesso:'#2ecc71' }[n.prioridade];
-    const corBorda  = dotColor;
+    const cls = ICONE_CLASSE[n.prioridade] || 'info';
+    const dotColor = { urgente: 'var(--danger)', atencao: '#e67e22', info: '#4a9fd9', sucesso: '#2ecc71' }[n.prioridade];
+    const corBorda = dotColor;
 
     return `<div class="notif-item ${n.lida ? 'lida' : 'nao-lida'}"
               style="--prioridade-cor:${corBorda}"
@@ -174,8 +174,8 @@ document.querySelectorAll('.filtro-tab').forEach(btn => {
 });
 
 // ── Sidebar mobile ─────────────────────────────────────────────────────
-const sidebar        = document.getElementById('sidebar');
-const menuToggle     = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const menuToggle = document.getElementById('menuToggle');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
 menuToggle.addEventListener('click', () => { sidebar.classList.toggle('open'); sidebarOverlay.classList.toggle('open'); });
 sidebarOverlay.addEventListener('click', () => { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('open'); });

@@ -21,14 +21,14 @@ function formatarData(dataStr) {
     .toLocaleDateString('pt-BR');
 }
 // ── Cores dos avatares ─────────────────────────────────────────────────
-const CORES = ['#e03040','#2e6da4','#8e44ad','#e67e22','#27ae60','#16a085','#d35400','#2980b9'];
+const CORES = ['#e03040', '#2e6da4', '#8e44ad', '#e67e22', '#27ae60', '#16a085', '#d35400', '#2980b9'];
 function corAvatar(nome) {
   let h = 0;
   for (let i = 0; i < nome.length; i++) h = nome.charCodeAt(i) + ((h << 5) - h);
   return CORES[Math.abs(h) % CORES.length];
 }
 function iniciais(nome) {
-  return nome.split(' ').slice(0,2).map(p => p[0]).join('').toUpperCase();
+  return nome.split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
 }
 
 // ── Pegar matrícula da URL ─────────────────────────────────────────────
@@ -39,8 +39,8 @@ function getMatricula() {
 
 // ── Badge de status ─────────────────────────────────────────────────────
 function badgeStatus(status) {
-  const map = { ok:'badge-ok', info:'badge-info', warn:'badge-warn' };
-  const txt = { ok:'OK', info:'Em curso', warn:'Revisar' };
+  const map = { ok: 'badge-ok', info: 'badge-info', warn: 'badge-warn' };
+  const txt = { ok: 'OK', info: 'Em curso', warn: 'Revisar' };
   return `<span class="badge ${map[status]}">${txt[status]}</span>`;
 }
 
@@ -108,7 +108,7 @@ async function renderFicha(mat) {
     listaAtestados = atestados;
 
     renderTabela(atestados);
-    popularFiltroAno(atestados); 
+    popularFiltroAno(atestados);
   } catch (err) {
     console.error("Erro ao carregar ficha:", err);
   }
@@ -234,8 +234,8 @@ document.getElementById('salvarEditar').onclick = async () => {
 };
 
 // ── Sidebar mobile ────────────────────────────────────────────────────
-const sidebar        = document.getElementById('sidebar');
-const menuToggle     = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const menuToggle = document.getElementById('menuToggle');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
 
 menuToggle.addEventListener('click', () => {

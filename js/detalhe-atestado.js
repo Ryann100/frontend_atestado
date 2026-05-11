@@ -22,7 +22,7 @@ function formatarData(dataStr) {
   return new Date(dataStr).toLocaleDateString('pt-BR')
 }
 
-const CORES = ['#e03040','#2e6da4','#8e44ad','#e67e22','#27ae60','#16a085','#d35400','#2980b9']
+const CORES = ['#e03040', '#2e6da4', '#8e44ad', '#e67e22', '#27ae60', '#16a085', '#d35400', '#2980b9']
 function corAvatar(nome) {
   let h = 0
   for (let i = 0; i < nome.length; i++) h = nome.charCodeAt(i) + ((h << 5) - h)
@@ -165,8 +165,8 @@ function renderDetalhe(a) {
 }
 
 // ── Sidebar mobile ─────────────────────────────────────────────────────
-const sidebar        = document.getElementById('sidebar')
-const menuToggle     = document.getElementById('menuToggle')
+const sidebar = document.getElementById('sidebar')
+const menuToggle = document.getElementById('menuToggle')
 const sidebarOverlay = document.getElementById('sidebarOverlay')
 
 menuToggle.addEventListener('click', () => {

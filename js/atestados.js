@@ -22,23 +22,23 @@ let sortCol = '';
 let sortDir = 'asc';
 
 // ── Elementos ──────────────────────────────────────────────────────────
-const tbody             = document.getElementById('tbodyAtestados');
-const pagInfo           = document.getElementById('pagInfo');
+const tbody = document.getElementById('tbodyAtestados');
+const pagInfo = document.getElementById('pagInfo');
 const filtroCompetencia = document.getElementById('filtroCompetencia');
-const filtroTipo        = document.getElementById('filtroTipo');
-const filtroSetor       = document.getElementById('filtroSetor');
-const filtroBusca       = document.getElementById('filtroBusca');
-const btnLimpar         = document.getElementById('btnLimpar');
+const filtroTipo = document.getElementById('filtroTipo');
+const filtroSetor = document.getElementById('filtroSetor');
+const filtroBusca = document.getElementById('filtroBusca');
+const btnLimpar = document.getElementById('btnLimpar');
 
 // ── Cores dos avatares ─────────────────────────────────────────────────
-const CORES = ['#e03040','#2e6da4','#8e44ad','#e67e22','#27ae60','#16a085','#d35400','#2980b9'];
+const CORES = ['#e03040', '#2e6da4', '#8e44ad', '#e67e22', '#27ae60', '#16a085', '#d35400', '#2980b9'];
 function corAvatar(nome) {
   let hash = 0;
   for (let i = 0; i < nome.length; i++) hash = nome.charCodeAt(i) + ((hash << 5) - hash);
   return CORES[Math.abs(hash) % CORES.length];
 }
 function iniciaisAvatar(nome) {
-  return nome.split(' ').slice(0,2).map(p => p[0]).join('').toUpperCase();
+  return nome.split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
 }
 
 // ── Formatar data ──────────────────────────────────────────────────────
@@ -64,9 +64,9 @@ async function carregarAtestados() {
       fetch('https://api-atestado.onrender.com/tipo-atestado/')
     ]);
 
-    const atestados     = await resAtestados.json();
+    const atestados = await resAtestados.json();
     const colaboradores = await resColaboradores.json();
-    const tipos         = await resTipos.json();
+    const tipos = await resTipos.json();
 
     // Mapas para cruzamento
     const mapaColabs = {};
@@ -78,21 +78,23 @@ async function carregarAtestados() {
     // Montar atestados enriquecidos
     ATESTADOS = atestados.map(a => {
       const colab = mapaColabs[a.matricula] || {};
-      const tipo  = mapaTipos[a.tipoId]    || {};
+      const tipo = mapaTipos[a.tipoId] || {};
       return {
-        id:          a.id,
-        matricula:   a.matricula,
-        colaborador: colab.nome        || a.matricula,
-        setor:       colab.departamento || '—',
-        tipo:        tipo.tipo          || '—',
-        emissao:     a.dataEmissao,
-        inicio:      a.dataInicio,
-        fim:         a.dataFim,
-        dias:        a.quantidadeDias,
-        cid:         a.cid,
+        id: a.id,
+        matricula: a.matricula,
+        colaborador: colab.nome || a.matricula,
+        setor: colab.departamento || '—',
+        tipo: tipo.tipo || '—',
+        emissao: a.dataEmissao,
+        inicio: a.dataInicio,
+        fim: a.dataFim,
+        dias: a.quantidadeDias,
+        cid: a.cid,
         competencia: a.competencia,
       };
     });
+
+    ATESTADOS.sort((a, b) => new Date(b.emissao) - new Date(a.emissao));
 
     dadosFiltrados = [...ATESTADOS];
     popularFiltroCompetencia();
@@ -114,11 +116,11 @@ function atualizarCompetenciaTopbar() {
   const mes = hoje.getMonth(); // 0-based
 
   const inicio = new Date(ano, mes - 1, 16);
-  const fim    = new Date(ano, mes, 15);
+  const fim = new Date(ano, mes, 15);
 
   const nomeMes = hoje.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
   const fmtInicio = inicio.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-  const fmtFim    = fim.toLocaleDateString('pt-BR',    { day: '2-digit', month: '2-digit' });
+  const fmtFim = fim.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 
   const label = nomeMes.replace(/^\w/, c => c.toUpperCase()).replace('.', '');
 
@@ -175,13 +177,13 @@ function renderTabela() {
   }
 
   tbody.innerHTML = pagina.map(a => {
-    const cor      = corAvatar(a.colaborador);
+    const cor = corAvatar(a.colaborador);
     const iniciais = iniciaisAvatar(a.colaborador);
-    const cidHtml  = a.cid && a.cid.startsWith('F')
+    const cidHtml = a.cid && a.cid.startsWith('F')
       ? `<span class="cid-nri">${a.cid} ⚠</span>`
       : (a.cid || '—');
     const diasHtml = a.dias !== null && a.dias !== undefined ? a.dias : '—';
-    const fimStr   = a.fim ? ` – ${formatarData(a.fim)}` : '';
+    const fimStr = a.fim ? ` – ${formatarData(a.fim)}` : '';
 
     return `
     <tr onclick="location.href='detalhe-atestado.html?id=${a.id}'">
@@ -212,10 +214,10 @@ function renderTabela() {
 
 // ── Paginação ──────────────────────────────────────────────────────────
 function renderPaginacao() {
-  const total    = dadosFiltrados.length;
+  const total = dadosFiltrados.length;
   const totalPag = Math.ceil(total / POR_PAGINA);
-  const inicio   = (paginaAtual - 1) * POR_PAGINA + 1;
-  const fim      = Math.min(paginaAtual * POR_PAGINA, total);
+  const inicio = (paginaAtual - 1) * POR_PAGINA + 1;
+  const fim = Math.min(paginaAtual * POR_PAGINA, total);
 
   pagInfo.textContent = total === 0
     ? 'Nenhum registro encontrado'
@@ -226,7 +228,7 @@ function renderPaginacao() {
 
   const btnAnt = document.createElement('button');
   btnAnt.className = 'pag-btn';
-  btnAnt.disabled  = paginaAtual === 1;
+  btnAnt.disabled = paginaAtual === 1;
   btnAnt.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>`;
   btnAnt.addEventListener('click', () => { if (paginaAtual > 1) { paginaAtual--; render(); } });
   wrap.appendChild(btnAnt);
@@ -254,7 +256,7 @@ function renderPaginacao() {
 
   const btnProx = document.createElement('button');
   btnProx.className = 'pag-btn';
-  btnProx.disabled  = paginaAtual === totalPag || total === 0;
+  btnProx.disabled = paginaAtual === totalPag || total === 0;
   btnProx.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>`;
   btnProx.addEventListener('click', () => {
     if (paginaAtual < Math.ceil(dadosFiltrados.length / POR_PAGINA)) { paginaAtual++; render(); }
@@ -264,15 +266,15 @@ function renderPaginacao() {
 
 // ── Resumo ─────────────────────────────────────────────────────────────
 function atualizarResumo() {
-  const total     = dadosFiltrados.length;
-  const comparec  = dadosFiltrados.filter(a => a.tipo === 'Comparecimento Médico').length;
+  const total = dadosFiltrados.length;
+  const comparec = dadosFiltrados.filter(a => a.tipo === 'Comparecimento Médico').length;
   const diasTotal = dadosFiltrados.filter(a => a.dias).reduce((s, a) => s + a.dias, 0);
-  const nri       = dadosFiltrados.filter(a => a.cid && a.cid.startsWith('F')).length;
+  const nri = dadosFiltrados.filter(a => a.cid && a.cid.startsWith('F')).length;
 
   document.getElementById('totalAtestados').textContent = total;
-  document.getElementById('totalComparec').textContent  = comparec;
-  document.getElementById('totalDias').textContent      = diasTotal;
-  document.getElementById('totalNri').textContent       = nri;
+  document.getElementById('totalComparec').textContent = comparec;
+  document.getElementById('totalDias').textContent = diasTotal;
+  document.getElementById('totalNri').textContent = nri;
 }
 
 // ── Render geral ───────────────────────────────────────────────────────
@@ -284,14 +286,14 @@ function render() {
 
 // ── Filtros ────────────────────────────────────────────────────────────
 function aplicarFiltros() {
-  const tipo        = filtroTipo.value;
-  const setor       = filtroSetor.value;
+  const tipo = filtroTipo.value;
+  const setor = filtroSetor.value;
   const competencia = filtroCompetencia.value;
-  const busca       = filtroBusca.value.toLowerCase().trim();
+  const busca = filtroBusca.value.toLowerCase().trim();
 
   dadosFiltrados = ATESTADOS.filter(a => {
-    if (tipo        && a.tipo        !== tipo)        return false;
-    if (setor       && a.setor       !== setor)       return false;
+    if (tipo && a.tipo !== tipo) return false;
+    if (setor && a.setor !== setor) return false;
     if (competencia && a.competencia !== competencia) return false;
     if (busca && !a.colaborador.toLowerCase().includes(busca) && !a.matricula.includes(busca)) return false;
     return true;
@@ -334,13 +336,13 @@ filtroBusca.addEventListener('input', aplicarFiltros);
 
 btnLimpar.addEventListener('click', () => {
   filtroCompetencia.selectedIndex = 0;
-  filtroTipo.selectedIndex        = 0;
-  filtroSetor.selectedIndex       = 0;
-  filtroBusca.value               = '';
+  filtroTipo.selectedIndex = 0;
+  filtroSetor.selectedIndex = 0;
+  filtroBusca.value = '';
   sortCol = ''; sortDir = 'asc';
   dadosFiltrados = [...ATESTADOS];
-  paginaAtual    = 1;
-  document.querySelectorAll('.th-sort').forEach(th => th.classList.remove('asc','desc'));
+  paginaAtual = 1;
+  document.querySelectorAll('.th-sort').forEach(th => th.classList.remove('asc', 'desc'));
   render();
 });
 
@@ -349,8 +351,8 @@ document.querySelectorAll('.th-sort').forEach(th => {
 });
 
 // ── Sidebar mobile ─────────────────────────────────────────────────────
-const sidebar        = document.getElementById('sidebar');
-const menuToggle     = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const menuToggle = document.getElementById('menuToggle');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
 
 menuToggle.addEventListener('click', () => {
