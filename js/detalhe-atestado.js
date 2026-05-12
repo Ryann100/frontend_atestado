@@ -150,6 +150,19 @@ function renderDetalhe(a) {
     document.getElementById('obsTexto').textContent = a.observacoes
   }
 
+  // Arquivo do atestado
+  const arquivoContainer = document.getElementById('arquivoAtestado');
+  const linkArquivo = document.getElementById('linkArquivoAtestado');
+
+  const urlArquivo = a.arquivoUrl
+
+  if (urlArquivo) {
+    linkArquivo.href = urlArquivo;
+    arquivoContainer.style.display = 'block';
+  } else {
+    arquivoContainer.style.display = 'none';
+  }
+
   // Colaborador mini
   const cor = corAvatar(colab.nome || '')
   const ini = iniciais(colab.nome || '?')

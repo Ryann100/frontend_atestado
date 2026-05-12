@@ -472,6 +472,69 @@
   background: #c0392b;
 }
 
+/* ── Arquivo do atestado ───────────────────────────────────────────── */
+.arquivo-atestado {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.arquivo-atestado a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  width: 100%;
+  padding: 14px 16px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(224, 48, 64, 0.12),
+    rgba(224, 48, 64, 0.06)
+  );
+  border: 1px solid rgba(224, 48, 64, 0.22);
+  border-radius: 12px;
+
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+
+  box-shadow: 0 4px 12px rgba(224, 48, 64, 0.08);
+  transition: all 0.2s ease;
+}
+
+.arquivo-atestado a:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(224, 48, 64, 0.18),
+    rgba(224, 48, 64, 0.10)
+  );
+  border-color: rgba(224, 48, 64, 0.35);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(224, 48, 64, 0.18);
+}
+
+.arquivo-atestado a:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(224, 48, 64, 0.10);
+}
+
+.arquivo-atestado a svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.arquivo-atestado a:hover svg {
+  transform: scale(1.08);
+}
+
 /* ── Responsividade ── */
 @media (max-width: 900px) {
   .detalhe-grid {
