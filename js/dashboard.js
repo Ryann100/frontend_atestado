@@ -24,20 +24,36 @@ function carregarUsuario() {
 
 function getCompetenciaAtual() {
   const hoje = new Date();
-  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-  return `${hoje.getFullYear()}/${mes}`;
+
+  let ano = hoje.getFullYear();
+  let mes = hoje.getMonth(); // 1-12
+
+
+
+  return `${ano}/${String(mes).padStart(2, '0')}`;
 }
 
 function labelCompetencia(comp) {
-  // comp = "2025/04"
-  const [ano, mes] = comp.split('/');
-  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-  const nomeMes = meses[Number(mes) - 1];
+  const [anoStr, mesStr] = comp.split('/');
+  const ano = Number(anoStr);
+  const mes = Number(mesStr); // 1-12
+  const meses = [
+    'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+  ];
+  const nomeMes = meses[mes];
+  const inicio = new Date(ano, mes - 1, 16);
+  const fim = new Date(ano, mes, 15);
 
-  const inicio = new Date(Number(ano), Number(mes) - 1, 16);
-  const fim = new Date(Number(ano), Number(mes), 15);
-  const fmtIni = inicio.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-  const fmtFim = fim.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  const fmtIni = inicio.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit'
+  });
+
+  const fmtFim = fim.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit'
+  });
 
   return `${nomeMes}/${ano} · ${fmtIni} a ${fmtFim}`;
 }
